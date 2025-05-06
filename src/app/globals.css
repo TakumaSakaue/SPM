@@ -1,0 +1,259 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 30, 41, 59;
+  --background-rgb: 248, 250, 252;
+  --card-rgb: 255, 255, 255;
+  --neutral-color: #c0c0c0;
+  --happy-color: #ffde34;
+  --sad-color: #5b89eb;
+  --angry-color: #ff6347;
+  --fearful-color: #9370db;
+  --disgusted-color: #2e8b57;
+  --surprised-color: #ff69b4;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-rgb: 15, 23, 42;
+    --card-rgb: 30, 41, 59;
+  }
+}
+
+/* 背景画像のURLを複数用意（フォールバック用） */
+body {
+  color: rgb(var(--foreground-rgb));
+  min-height: 100vh;
+  background-image: 
+    url('/bg-pattern.jpg'),
+    url('https://images.unsplash.com/photo-1516557070061-c3d1653fa646?q=80'),
+    linear-gradient(135deg, rgb(var(--background-rgb)), rgb(var(--card-rgb)));
+  background-color: rgb(var(--background-rgb));
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  position: relative;
+}
+
+/* バックアップの背景スタイル - 万が一背景画像が読み込めない場合 */
+.body-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgb(var(--background-rgb)), rgb(var(--card-rgb)));
+  background-image: radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+                    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+  z-index: -2;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
+  backdrop-filter: blur(5px);
+  z-index: -1;
+}
+
+/* グラスモーフィズム共通スタイル */
+.glass-container {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(16px);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.glass-container-dark {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(16px);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+}
+
+.canvas-container {
+  position: relative;
+  margin: 0 auto;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.webcam, canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 1rem;
+}
+
+.bg-neutral {
+  background-color: rgba(192, 192, 192, 0.3);
+  box-shadow: 0 0 15px rgba(192, 192, 192, 0.5);
+}
+
+.bg-happy {
+  background-color: rgba(255, 222, 52, 0.3);
+  box-shadow: 0 0 15px rgba(255, 222, 52, 0.5);
+}
+
+.bg-sad {
+  background-color: rgba(91, 137, 235, 0.3);
+  box-shadow: 0 0 15px rgba(91, 137, 235, 0.5);
+}
+
+.bg-angry {
+  background-color: rgba(255, 99, 71, 0.3);
+  box-shadow: 0 0 15px rgba(255, 99, 71, 0.5);
+}
+
+.bg-fearful {
+  background-color: rgba(147, 112, 219, 0.3);
+  box-shadow: 0 0 15px rgba(147, 112, 219, 0.5);
+}
+
+.bg-disgusted {
+  background-color: rgba(46, 139, 87, 0.3);
+  box-shadow: 0 0 15px rgba(46, 139, 87, 0.5);
+}
+
+.bg-surprised {
+  background-color: rgba(255, 105, 180, 0.3);
+  box-shadow: 0 0 15px rgba(255, 105, 180, 0.5);
+}
+
+/* アニメーション */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* スクロールバースタイル */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* ボタンスタイル */
+.glass-button {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.glass-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.glass-button-dark {
+  background: rgba(30, 41, 59, 0.6);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* サイドバーのスタイル */
+.sidebar-resize-handle {
+  cursor: col-resize;
+  width: 4px;
+  height: 100%;
+  background-color: rgba(200, 200, 200, 0.3);
+  transition: background-color 0.2s ease;
+}
+
+.sidebar-resize-handle:hover,
+.sidebar-resize-handle:active {
+  background-color: rgba(79, 70, 229, 0.6);
+}
+
+/* サイドバーメニューアイテム */
+.sidebar-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.sidebar-menu-item:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.sidebar-menu-item.active {
+  background: rgba(79, 70, 229, 0.3);
+  color: rgba(79, 70, 229, 1);
+}
+
+/* サイドバートグルボタン */
+.sidebar-toggle {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  transition: all 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+  background: white;
+  transform: scale(1.05);
+} 
