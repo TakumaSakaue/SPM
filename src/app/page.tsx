@@ -104,7 +104,16 @@ export default function Home() {
   }, [isAnalyzing]);
   
   // 球体アニメーションのコントロール
-ええ
+  const handleCristalClick = () => {
+    setIsModalOpen(true);
+    setIsAnalyzing(true);
+    setAnalysisStartTime(Date.now());
+    
+    // 5秒後に分析完了とする
+    setTimeout(() => {
+      setIsAnalyzing(false);
+      setAnalysisComplete(true);
+    }, 5000);
   };
 
   // モーダルを閉じる処理
@@ -286,7 +295,7 @@ export default function Home() {
       // 脈動するエフェクト
       const pulseSize = Math.sin(Date.now() * 0.005) * 5 + 45;
       
-      // 脈動エフェクト描画
+      // 脈エフェクト描画
       ctx.beginPath();
       ctx.arc(sourceX, centerY, pulseSize, 0, Math.PI * 2);
       const gradient1 = ctx.createRadialGradient(sourceX, centerY, 30, sourceX, centerY, pulseSize);
@@ -368,6 +377,242 @@ export default function Home() {
       return () => clearTimeout(timer);
     }
   }, [dataTransferComplete, isSlideOptimizing]);
+
+  // 水晶球アニメーションの描画
+  useEffect(() => {
+    if (!isAnalyzing || !sphereCanvasRef.current) return;
+    
+    console.log("球体アニメーション開始");
+    
+    // キャンバスとコンテキストの取得
+    const canvas = sphereCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // キャンバスサイズを設定 - 親要素のサイズに合わせる
+    const setCanvasSize = () => {
+      // コンテナのサイズを取得
+      const container = canvas.parentElement;
+      if (container) {
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+      } else {
+        // デフォルトサイズ
+        canvas.width = 450;
+        canvas.height = 450;
+      }
+    };
+    
+    setCanvasSize();
+    
+    // ウィンドウリサイズ時に再設定
+    const handleResize = () => {
+      setCanvasSize();
+    };
+    
+    window.addEventListener('resize', handleResize);
+
+    // 型定義
+    interface StarDot {
+      x: number;
+      y: number;
+      z: number;
+      radius: number;
+      color: string;
+      brightness: number;
+      twinkle: number;
+      twinkleOffset: number;
+    }
+    
+    // 点の配列を定義
+    const dots: StarDot[] = [];
+    
+    // 天体風の色の配列
+    const starColors = [
+      'rgba(0, 255, 255, 0.9)',  // 明るいシアン
+      'rgba(0, 210, 255, 0.8)',  // シアンブルー
+      'rgba(0, 190, 230, 0.8)',  // やや暗いシアン
+      'rgba(0, 170, 210, 0.7)',  // 深いシアン
+      'rgba(0, 150, 190, 0.7)',  // 濃いシアンブルー
+      'rgba(110, 220, 255, 0.7)' // 明るいシアンブルー
+    ];
+    
+    // 球体上に点を生成
+    const generateSphere = () => {
+      // キャンバスのサイズが変わっている可能性があるので再取得
+      const canvasSize = Math.min(canvas.width, canvas.height);
+      const numDots = 1500; // 点の数
+      const radius = canvasSize * 0.45; // 球体の半径を完全な円形にするために最小値を使用
+      
+      dots.length = 0; // 配列をクリア
+      
+      for (let i = 0; i < numDots; i++) {
+        // 球面上の点を均等に分布させる
+        const u = Math.random();
+        const v = Math.random();
+        const theta = 2 * Math.PI * u; // 0～2π（経度）
+        const phi = Math.acos(2 * v - 1); // 0～π（緯度）
+        
+        const x = radius * Math.sin(phi) * Math.cos(theta);
+        const y = radius * Math.sin(phi) * Math.sin(theta);
+        const z = radius * Math.cos(phi);
+        
+        // ランダムな大きさとランダムな色を割り当て
+        const randomSize = Math.random();
+        const starSize = randomSize * 2.5 + 0.3; // 大きさをよりバリエーション豊かに
+        const colorIndex = Math.floor(Math.random() * starColors.length);
+        const brightness = randomSize * 0.7 + 0.3; // 明るさもランダムに
+        
+        // 星の瞬きのパラメータ
+        const twinkle = Math.random() * 0.08 + 0.04; // 瞬きの速度をさらに速く
+        const twinkleOffset = Math.random() * Math.PI * 2; // 瞬きの初期位相
+        
+        dots.push({
+          x, y, z,
+          radius: starSize,
+          color: starColors[colorIndex],
+          brightness: brightness,
+          twinkle: twinkle,
+          twinkleOffset: twinkleOffset
+        });
+      }
+    };
+    
+    generateSphere();
+    
+    // アニメーションフレーム
+    let angle = 0;
+    let time = 0;
+    
+    const animate = () => {
+      try {
+        // キャンバスをクリア
+        ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // 完全な円形の背景を描画
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, canvas.height / 2, Math.min(canvas.width, canvas.height) / 2 * 0.95, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+        ctx.fill();
+        
+        // 中心点を正確に計算
+        const centerX = Math.floor(canvas.width / 2);
+        const centerY = Math.floor(canvas.height / 2);
+        
+        // 共通で使用する半径を定義
+        const targetRadius = Math.min(canvas.width, canvas.height) * 0.45;
+        
+        // 回転角度と時間を更新
+        angle += 0.006; // 回転を少し遅く
+        time += 0.016; // 約60fpsで1秒あたり1増加
+        
+        // 点を描画
+        for (const dot of dots) {
+          // 回転行列を適用（Y軸周り）
+          const cosAngle = Math.cos(angle);
+          const sinAngle = Math.sin(angle);
+          
+          const rotatedX = dot.x * cosAngle - dot.z * sinAngle;
+          const rotatedZ = dot.x * sinAngle + dot.z * cosAngle;
+          
+          // Z値に基づいて大きさと透明度を調整（完全な球体効果のために調整）
+          const scale = (rotatedZ + targetRadius) / (targetRadius * 2);
+          
+          // 瞬きのエフェクト（サイン波で明るさを変化させる）
+          const twinkleEffect = Math.sin(time * dot.twinkle + dot.twinkleOffset) * 0.3 + 0.7;
+          const size = Math.max(0.1, Math.min(dot.radius * (0.5 + scale) * twinkleEffect, 10)); // 最小・最大値を設定
+          const alpha = Math.max(0.1, Math.min((0.1 + scale * dot.brightness) * twinkleEffect, 1.0)); // 最小・最大値を設定
+          
+          // baseColorを計算
+          const baseColor = dot.color.replace(/[^,]+(?=\))/, alpha.toString());
+          
+          // グラデーションを使って輝く星を表現
+          const exactX = Math.round(centerX + rotatedX);
+          const exactY = Math.round(centerY + dot.y);
+
+          // 画面内の点のみ描画（完全な円形を保つため）
+          const distance = Math.sqrt(Math.pow(exactX - centerX, 2) + Math.pow(exactY - centerY, 2));
+          if (distance <= targetRadius) {
+            const grd = ctx.createRadialGradient(
+              exactX, exactY, 0,
+              exactX, exactY, size * 2
+            );
+            
+            // グラデーションカラーストップを設定
+            grd.addColorStop(0, baseColor);
+            grd.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            
+            // 点を描画
+            ctx.beginPath();
+            ctx.arc(
+              exactX,
+              exactY,
+              size,
+              0, Math.PI * 2
+            );
+            ctx.fillStyle = baseColor;
+            ctx.fill();
+            
+            // 明るい星には輝きを追加
+            if (dot.radius > 1.5) {
+              ctx.beginPath();
+              ctx.arc(
+                exactX,
+                exactY,
+                size * 1.8,
+                0, Math.PI * 2
+              );
+              ctx.fillStyle = grd;
+              ctx.fill();
+              
+              // 最も明るい星には十字の光芒を追加
+              if (dot.radius > 2.0 && isFinite(size)) {
+                const glowSize = isFinite(size * 3) ? size * 3 : 6;
+                
+                if (isFinite(exactX) && isFinite(exactY) && isFinite(glowSize)) {
+                  // 水平の光芒
+                  ctx.beginPath();
+                  ctx.moveTo(exactX - glowSize, exactY);
+                  ctx.lineTo(exactX + glowSize, exactY);
+                  ctx.strokeStyle = `rgba(0, 255, 255, ${Math.min(alpha * 0.3, 1)})`;
+                  ctx.lineWidth = Math.max(0.1, Math.min(size * 0.5, 10)); // 範囲を制限
+                  ctx.stroke();
+                  
+                  // 垂直の光芒
+                  ctx.beginPath();
+                  ctx.moveTo(exactX, exactY - glowSize);
+                  ctx.lineTo(exactX, exactY + glowSize);
+                  ctx.strokeStyle = `rgba(0, 255, 255, ${Math.min(alpha * 0.3, 1)})`;
+                  ctx.lineWidth = Math.max(0.1, Math.min(size * 0.5, 10)); // 範囲を制限
+                  ctx.stroke();
+                }
+              }
+            }
+          }
+        }
+        
+        // 次のフレームをリクエスト
+        animationFrameRef.current = requestAnimationFrame(animate);
+      } catch (error) {
+        console.error("Animation error:", error);
+        // エラーが発生しても続行
+        animationFrameRef.current = requestAnimationFrame(animate);
+      }
+    };
+    
+    // アニメーションを開始
+    animate();
+    
+    // クリーンアップ関数
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
+  }, [isAnalyzing]);
 
   return (
     <div className="flex h-screen overflow-hidden">
