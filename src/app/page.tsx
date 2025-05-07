@@ -201,7 +201,7 @@ export default function Home() {
     // データ転送中でない、またはキャンバス参照がない場合は何もしない
     if (!isDataTransferring || !dataTransferCanvasRef.current) return;
     
-    console.log("データ転送アニメーション開始");
+    console.log("近未来的ビジネススタイルデータ転送アニメーション開始");
     
     // キャンバスとコンテキストの取得
     const canvas = dataTransferCanvasRef.current;
@@ -212,6 +212,13 @@ export default function Home() {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
     
+    // 近未来的なビジネス向けの配色
+    const bgColor = '#081325';
+    const primaryColor = '#1E88E5';
+    const secondaryColor = '#00ACC1';
+    const accentColor = '#64FFDA';
+    const textColor = '#E0F7FA';
+    
     // 商談分析エージェントと戦略エージェントのアイコン位置
     const sourceX = canvas.width * 0.2;
     const targetX = canvas.width * 0.8;
@@ -220,6 +227,780 @@ export default function Home() {
     // ローカルのパケットデータ（コピーを作成）
     const localPackets = [...dataPackets];
     
+    // デジタルノイズパターンの描画関数
+    function drawDigitalNoise(ctx: CanvasRenderingContext2D) {
+      const imageData = ctx.createImageData(canvas.width, canvas.height);
+      const data = imageData.data;
+      
+      for (let i = 0; i < data.length; i += 4) {
+        const noise = Math.random() * 10;
+        const r = 5 + noise;
+        const g = 12 + noise;
+        const b = 25 + noise;
+        data[i] = r;
+        data[i + 1] = g;
+        data[i + 2] = b;
+        data[i + 3] = 20; // より控えめな透明度
+      }
+      
+      ctx.putImageData(imageData, 0, 0);
+    }
+    
+    // 近未来的なグリッドの描画
+    function drawFuturisticGrid(ctx: CanvasRenderingContext2D) {
+      // 大きなグリッド
+      ctx.strokeStyle = 'rgba(30, 136, 229, 0.08)';
+      ctx.lineWidth = 1;
+      
+      // 垂直線
+      for (let x = 0; x < canvas.width; x += 100) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      
+      // 水平線
+      for (let y = 0; y < canvas.height; y += 100) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+      
+      // 小さなグリッド
+      ctx.strokeStyle = 'rgba(30, 136, 229, 0.04)';
+      ctx.lineWidth = 0.5;
+      
+      // 垂直線
+      for (let x = 0; x < canvas.width; x += 25) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      
+      // 水平線
+      for (let y = 0; y < canvas.height; y += 25) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+      
+      // 2本の洗練されたスキャンライン
+      const scanY1 = (Date.now() % 6000) / 6000 * canvas.height;
+      const scanY2 = ((Date.now() + 3000) % 6000) / 6000 * canvas.height;
+      
+      // 1本目のスキャンライン
+      ctx.strokeStyle = 'rgba(100, 255, 218, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, scanY1);
+      ctx.lineTo(canvas.width, scanY1);
+      ctx.stroke();
+      
+      // 2本目のスキャンライン
+      ctx.strokeStyle = 'rgba(0, 172, 193, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, scanY2);
+      ctx.lineTo(canvas.width, scanY2);
+      ctx.stroke();
+      
+      // フェードエフェクト（より洗練された薄いグロー）
+      const scanGradient1 = ctx.createLinearGradient(0, scanY1 - 50, 0, scanY1 + 50);
+      scanGradient1.addColorStop(0, 'rgba(100, 255, 218, 0)');
+      scanGradient1.addColorStop(0.5, 'rgba(100, 255, 218, 0.03)');
+      scanGradient1.addColorStop(1, 'rgba(100, 255, 218, 0)');
+      
+      ctx.fillStyle = scanGradient1;
+      ctx.fillRect(0, scanY1 - 50, canvas.width, 100);
+      
+      const scanGradient2 = ctx.createLinearGradient(0, scanY2 - 50, 0, scanY2 + 50);
+      scanGradient2.addColorStop(0, 'rgba(0, 172, 193, 0)');
+      scanGradient2.addColorStop(0.5, 'rgba(0, 172, 193, 0.03)');
+      scanGradient2.addColorStop(1, 'rgba(0, 172, 193, 0)');
+      
+      ctx.fillStyle = scanGradient2;
+      ctx.fillRect(0, scanY2 - 50, canvas.width, 100);
+    }
+    
+    // ビジネスノードの描画
+    function drawBusinessNode(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, type: 'source' | 'target') {
+      // 高級感のあるシャドウ効果
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = 15;
+      ctx.shadowOffsetX = 3;
+      ctx.shadowOffsetY = 3;
+      
+      // 外側の円
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = type === 'source' ? 'rgba(21, 101, 192, 0.9)' : 'rgba(0, 131, 143, 0.9)';
+      ctx.fill();
+      
+      // シャドウリセット
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      
+      // 内側の円（濃いグラデーション）
+      const innerGradient = ctx.createRadialGradient(
+        x - radius * 0.2, y - radius * 0.2, 0,
+        x, y, radius * 0.85
+      );
+      
+      if (type === 'source') {
+        innerGradient.addColorStop(0, 'rgba(30, 136, 229, 1)');
+        innerGradient.addColorStop(0.7, 'rgba(21, 101, 192, 0.9)');
+        innerGradient.addColorStop(1, 'rgba(13, 71, 161, 0.9)');
+      } else {
+        innerGradient.addColorStop(0, 'rgba(0, 172, 193, 1)');
+        innerGradient.addColorStop(0.7, 'rgba(0, 131, 143, 0.9)');
+        innerGradient.addColorStop(1, 'rgba(0, 96, 100, 0.9)');
+      }
+      
+      ctx.beginPath();
+      ctx.arc(x, y, radius * 0.85, 0, Math.PI * 2);
+      ctx.fillStyle = innerGradient;
+      ctx.fill();
+      
+      // 光沢効果（上部に薄いハイライト）
+      const highlightGradient = ctx.createRadialGradient(
+        x - radius * 0.3, y - radius * 0.3, 0,
+        x, y, radius * 0.7
+      );
+      highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
+      highlightGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.1)');
+      highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      
+      ctx.beginPath();
+      ctx.arc(x, y, radius * 0.7, 0, Math.PI * 2);
+      ctx.fillStyle = highlightGradient;
+      ctx.fill();
+      
+      // 中央のアイコン（洗練されたビジネスアイコン）
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      
+      if (type === 'source') {
+        // データ分析アイコン（グラフチャート風）
+        // バーチャート
+        const barWidth = radius * 0.1;
+        const barGap = radius * 0.05;
+        const barBase = y + radius * 0.2;
+        
+        // バー1
+        ctx.beginPath();
+        ctx.rect(x - radius * 0.3, barBase - radius * 0.1, barWidth, radius * 0.1);
+        ctx.fill();
+        
+        // バー2
+        ctx.beginPath();
+        ctx.rect(x - radius * 0.3 + barWidth + barGap, barBase - radius * 0.3, barWidth, radius * 0.3);
+        ctx.fill();
+        
+        // バー3
+        ctx.beginPath();
+        ctx.rect(x - radius * 0.3 + (barWidth + barGap) * 2, barBase - radius * 0.2, barWidth, radius * 0.2);
+        ctx.fill();
+        
+        // バー4
+        ctx.beginPath();
+        ctx.rect(x - radius * 0.3 + (barWidth + barGap) * 3, barBase - radius * 0.25, barWidth, radius * 0.25);
+        ctx.fill();
+        
+        // 線グラフ
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x - radius * 0.25, y - radius * 0.1);
+        ctx.lineTo(x - radius * 0.1, y - radius * 0.2);
+        ctx.lineTo(x + radius * 0.05, y - radius * 0.05);
+        ctx.lineTo(x + radius * 0.2, y - radius * 0.15);
+        ctx.stroke();
+        
+        // データポイント
+        ctx.beginPath();
+        ctx.arc(x - radius * 0.25, y - radius * 0.1, 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.arc(x - radius * 0.1, y - radius * 0.2, 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.arc(x + radius * 0.05, y - radius * 0.05, 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.arc(x + radius * 0.2, y - radius * 0.15, 3, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        // 戦略アイコン（チェス駒＋ビジネスアイコン）
+        
+        // チェスの駒の上部
+        ctx.beginPath();
+        ctx.arc(x, y - radius * 0.2, radius * 0.15, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 駒の首
+        ctx.beginPath();
+        ctx.moveTo(x - radius * 0.1, y - radius * 0.15);
+        ctx.lineTo(x - radius * 0.12, y + radius * 0.1);
+        ctx.lineTo(x + radius * 0.12, y + radius * 0.1);
+        ctx.lineTo(x + radius * 0.1, y - radius * 0.15);
+        ctx.fill();
+        
+        // 駒の台座
+        ctx.beginPath();
+        ctx.ellipse(x, y + radius * 0.15, radius * 0.2, radius * 0.08, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // ビジネス戦略アイコン - 歯車
+        const teethCount = 8;
+        const innerRadius = radius * 0.05;
+        const outerRadius = radius * 0.1;
+        
+        ctx.strokeStyle = 'rgba(0, 131, 143, 0.95)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        
+        for (let i = 0; i < teethCount; i++) {
+          const angle = (i / teethCount) * Math.PI * 2;
+          const innerX = x + innerRadius * Math.cos(angle);
+          const innerY = y + innerRadius * Math.sin(angle);
+          const outerX = x + outerRadius * Math.cos(angle);
+          const outerY = y + outerRadius * Math.sin(angle);
+          
+          if (i === 0) {
+            ctx.moveTo(innerX, innerY);
+          } else {
+            ctx.lineTo(innerX, innerY);
+          }
+          
+          ctx.lineTo(outerX, outerY);
+          
+          const nextAngle = ((i + 1) / teethCount) * Math.PI * 2;
+          const nextInnerX = x + innerRadius * Math.cos(nextAngle);
+          const nextInnerY = y + innerRadius * Math.sin(nextAngle);
+          
+          ctx.lineTo(x + outerRadius * Math.cos(nextAngle), y + outerRadius * Math.sin(nextAngle));
+          ctx.lineTo(nextInnerX, nextInnerY);
+        }
+        
+        ctx.closePath();
+        ctx.stroke();
+      }
+      
+      // ステータスリング (パルス効果を持つリング)
+      const time = Date.now() * 0.001;
+      const pulseSize = radius + Math.sin(time * 3) * 3;
+      
+      ctx.beginPath();
+      ctx.arc(x, y, pulseSize, 0, Math.PI * 2);
+      ctx.strokeStyle = type === 'source' 
+        ? `rgba(30, 136, 229, ${0.3 + Math.sin(time * 3) * 0.2})` 
+        : `rgba(0, 172, 193, ${0.3 + Math.sin(time * 3) * 0.2})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      
+      // ノードタイトル
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.font = 'bold 14px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(
+        type === 'source' ? 'ビジネスデータ分析' : '戦略立案エンジン', 
+        x, 
+        y + radius + 25
+      );
+      
+      // 状態表示（より洗練された形式）
+      const progress = Math.floor((Date.now() % 5000) / 50);
+      
+      ctx.font = '12px Arial';
+      ctx.fillStyle = 'rgba(224, 247, 250, 0.9)';
+      ctx.textAlign = 'center';
+      
+      if (type === 'source') {
+        ctx.fillText(`分析中: ${progress}%`, x, y - radius - 15);
+        
+        // 進捗円弧
+        const startAngle = -Math.PI / 2;
+        const endAngle = startAngle + (Math.PI * 2 * progress / 100);
+        
+        ctx.beginPath();
+        ctx.arc(x, y, radius + 8, startAngle, endAngle);
+        ctx.strokeStyle = 'rgba(100, 255, 218, 0.7)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      } else {
+        ctx.fillText('戦略最適化', x, y - radius - 15);
+        
+        // 進捗円弧（パルス効果）
+        const pulseTime = Date.now() * 0.002;
+        const segments = 3;
+        
+        for (let i = 0; i < segments; i++) {
+          const segmentAngle = Math.PI * 2 / segments;
+          const startAngle = -Math.PI / 2 + i * segmentAngle + pulseTime;
+          const endAngle = startAngle + segmentAngle * 0.7;
+          
+          ctx.beginPath();
+          ctx.arc(x, y, radius + 8, startAngle, endAngle);
+          ctx.strokeStyle = 'rgba(100, 255, 218, 0.6)';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+      }
+    }
+    
+    // 近未来的なデータ接続の描画
+    function drawFuturisticConnection(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number) {
+      // メインデータパス
+      const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+      gradient.addColorStop(0, primaryColor);
+      gradient.addColorStop(1, secondaryColor);
+      
+      ctx.beginPath();
+      ctx.moveTo(x1 + 30, y1);
+      ctx.lineTo(x2 - 30, y2);
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      
+      // データトラフィック表示
+      // データフロー速度の変数（時間経過で変化）
+      const flowSpeed = 1 + Math.sin(Date.now() * 0.001) * 0.3;
+      const flowOffset = (Date.now() * flowSpeed % 3000) / 3000;
+      
+      // データパケットのサイズと間隔
+      const packetSize = 4;
+      const gap = 40;
+      const totalLength = packetSize + gap;
+      
+      ctx.setLineDash([packetSize, gap]);
+      ctx.lineDashOffset = -flowOffset * totalLength * 3;
+      
+      ctx.beginPath();
+      ctx.moveTo(x1 + 30, y1);
+      ctx.lineTo(x2 - 30, y2);
+      ctx.strokeStyle = accentColor;
+      ctx.lineWidth = 5;
+      ctx.stroke();
+      
+      ctx.setLineDash([]);
+      
+      // トラフィック量表示
+      const dataAmount = Math.floor(50 + Math.sin(Date.now() * 0.0005) * 30);
+      
+      ctx.font = '12px Arial';
+      ctx.fillStyle = textColor;
+      ctx.textAlign = 'center';
+      ctx.fillText(
+        `データトラフィック: ${dataAmount} Mbps`, 
+        (x1 + x2) / 2, 
+        ((y1 + y2) / 2) - 30
+      );
+      
+      // トラフィック状態
+      ctx.fillStyle = accentColor;
+      ctx.font = 'bold 10px Arial';
+      ctx.fillText(
+        `伝送状態: 最適化中 (${Math.floor(flowSpeed * 100)}%)`,
+        (x1 + x2) / 2,
+        ((y1 + y2) / 2) - 15
+      );
+    }
+    
+    // ビジネスデータパケットの描画
+    function drawBusinessDataPacket(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, progress: number) {
+      // パケットの種類（進行度合いによって形状変化）- 洗練されたビジネススタイル
+      const packetType = progress < 0.3 ? 'diamond' : progress < 0.7 ? 'octagon' : 'document';
+      
+      // 共通の透明度と輝きエフェクト
+      const alpha = 0.7 + (progress * 0.3);
+      const glowStrength = 0.4 + Math.sin(Date.now() * 0.01 + progress * 10) * 0.15;
+      
+      // パケットのサイズ計算（進行によって少し大きくなる）
+      const actualSize = size * (0.8 + progress * 0.4);
+      
+      // パケットの基本色（進行に応じて変化）- より洗練された青系統
+      const r = Math.floor(20 + progress * 40);
+      const g = Math.floor(100 + progress * 60);
+      const b = Math.floor(200 + progress * 55);
+      const packColor = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      
+      // パケット描画
+      ctx.save();
+      
+      // パケットの形状に応じて描画
+      ctx.beginPath();
+      
+      if (packetType === 'diamond') {
+        // ダイヤモンド型（初期状態のデータパケット）- より先鋭的で高級感
+        ctx.moveTo(x, y - actualSize);
+        ctx.lineTo(x + actualSize * 0.7, y);
+        ctx.lineTo(x, y + actualSize);
+        ctx.lineTo(x - actualSize * 0.7, y);
+      } else if (packetType === 'octagon') {
+        // 八角形（処理中のデータパケット）- エンタープライズ感
+        for (let i = 0; i < 8; i++) {
+          const angle = (Math.PI / 4) * i;
+          const px = x + actualSize * 0.8 * Math.cos(angle);
+          const py = y + actualSize * 0.8 * Math.sin(angle);
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+      } else {
+        // ドキュメント形状（確定したビジネスデータ）- 書類のような形状
+        const docWidth = actualSize * 1.2;
+        const docHeight = actualSize * 1.4;
+        const cornerSize = actualSize * 0.2;
+        
+        ctx.moveTo(x - docWidth/2, y - docHeight/2);
+        ctx.lineTo(x + docWidth/2 - cornerSize, y - docHeight/2);
+        ctx.lineTo(x + docWidth/2, y - docHeight/2 + cornerSize);
+        ctx.lineTo(x + docWidth/2, y + docHeight/2);
+        ctx.lineTo(x - docWidth/2, y + docHeight/2);
+      }
+      
+      ctx.closePath();
+      
+      // 洗練されたグラデーション塗りつぶし
+      let gradient;
+      
+      if (packetType === 'document') {
+        // ドキュメント形式は線形グラデーション
+        gradient = ctx.createLinearGradient(
+          x - actualSize, y - actualSize,
+          x + actualSize, y + actualSize
+        );
+      } else {
+        // その他は放射状グラデーション
+        gradient = ctx.createRadialGradient(
+          x - actualSize * 0.3, y - actualSize * 0.3, 0,
+          x, y, actualSize * 1.2
+        );
+      }
+      
+      gradient.addColorStop(0, `rgba(${r + 40}, ${g + 40}, ${b}, ${alpha})`);
+      gradient.addColorStop(0.7, packColor);
+      gradient.addColorStop(1, `rgba(${r - 30}, ${g - 40}, ${b - 20}, ${alpha * 0.7})`);
+      
+      ctx.fillStyle = gradient;
+      ctx.fill();
+      
+      // 上品な縁取り効果
+      ctx.strokeStyle = `rgba(${r + 80}, ${g + 80}, ${b + 40}, ${alpha * 0.9})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      
+      // 輝きエフェクト
+      ctx.beginPath();
+      if (packetType === 'diamond') {
+        // ダイヤモンドの輝き
+        ctx.moveTo(x, y - actualSize * 0.6);
+        ctx.lineTo(x + actualSize * 0.5, y);
+        ctx.lineTo(x, y + actualSize * 0.6);
+        ctx.lineTo(x - actualSize * 0.5, y);
+      } else if (packetType === 'octagon') {
+        // 八角形の輝き - より小さく
+        for (let i = 0; i < 8; i++) {
+          const angle = (Math.PI / 4) * i;
+          const px = x + actualSize * 0.5 * Math.cos(angle);
+          const py = y + actualSize * 0.5 * Math.sin(angle);
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+      } else {
+        // ドキュメントの輝き - 書類の内部線
+        const innerWidth = actualSize * 0.9;
+        const innerHeight = actualSize * 1.1;
+        const cornerSize = actualSize * 0.15;
+        
+        ctx.moveTo(x - innerWidth/2, y - innerHeight/2);
+        ctx.lineTo(x + innerWidth/2 - cornerSize, y - innerHeight/2);
+        ctx.lineTo(x + innerWidth/2, y - innerHeight/2 + cornerSize);
+        ctx.lineTo(x + innerWidth/2, y + innerHeight/2);
+        ctx.lineTo(x - innerWidth/2, y + innerHeight/2);
+        ctx.closePath();
+      }
+      
+      // 輝きグラデーション - より控えめで高級感のある輝き
+      const glowGradient = ctx.createRadialGradient(
+        x - actualSize * 0.2, y - actualSize * 0.2, 0,
+        x, y, actualSize * 0.7
+      );
+      glowGradient.addColorStop(0, `rgba(180, 230, 255, ${glowStrength * 0.8})`);
+      glowGradient.addColorStop(1, `rgba(30, 136, 229, 0)`);
+      
+      ctx.fillStyle = glowGradient;
+      ctx.fill();
+      
+      // デジタルデータの内部線
+      if (packetType === 'document') {
+        // ドキュメント内部の線（ビジネス書類風）
+        ctx.strokeStyle = `rgba(220, 240, 255, ${glowStrength * 0.6})`;
+        ctx.lineWidth = 0.5;
+        
+        const docWidth = actualSize * 1.2;
+        const docHeight = actualSize * 1.4;
+        const lineGap = docHeight / 5;
+        
+        // 横線（文書の行）
+        for (let i = 1; i < 5; i++) {
+          const lineY = y - docHeight/2 + lineGap * i;
+          ctx.beginPath();
+          ctx.moveTo(x - docWidth/2 + actualSize * 0.2, lineY);
+          ctx.lineTo(x + docWidth/2 - actualSize * 0.2, lineY);
+          ctx.stroke();
+        }
+        
+        // 署名欄風のライン
+        ctx.beginPath();
+        ctx.moveTo(x - docWidth/4, y + docHeight/2 - actualSize * 0.3);
+        ctx.lineTo(x + docWidth/4, y + docHeight/2 - actualSize * 0.3);
+        ctx.stroke();
+      } else if (packetType === 'octagon') {
+        // 中間処理データの内部構造
+        ctx.strokeStyle = `rgba(180, 230, 255, ${glowStrength * 0.6})`;
+        ctx.lineWidth = 0.5;
+        
+        // データ構造線
+        for (let i = 0; i < 4; i++) {
+          const angle = (Math.PI / 4) * i;
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + actualSize * 0.7 * Math.cos(angle), y + actualSize * 0.7 * Math.sin(angle));
+          ctx.stroke();
+        }
+      } else {
+        // 初期データの内部線 - シンプルなデザイン
+        ctx.strokeStyle = `rgba(180, 230, 255, ${glowStrength * 0.5})`;
+        ctx.lineWidth = 0.5;
+        
+        // X印
+        ctx.beginPath();
+        ctx.moveTo(x - actualSize * 0.4, y - actualSize * 0.4);
+        ctx.lineTo(x + actualSize * 0.4, y + actualSize * 0.4);
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(x + actualSize * 0.4, y - actualSize * 0.4);
+        ctx.lineTo(x - actualSize * 0.4, y + actualSize * 0.4);
+        ctx.stroke();
+      }
+      
+      ctx.restore();
+    }
+    
+    // 分析背景の描画
+    function drawAnalyticsBackground(ctx: CanvasRenderingContext2D) {
+      // ビジネスアナリティクス背景
+      
+      // グローバルな透明度を下げる
+      ctx.globalAlpha = 0.2;
+      
+      // ビジネスチャート効果（右上）
+      ctx.strokeStyle = 'rgba(0, 172, 193, 0.5)';
+      ctx.lineWidth = 1;
+      
+      // 棒グラフチャート（右上）
+      const barCount = 6;
+      const barWidth = 12;
+      const barGap = 6;
+      const barMaxHeight = 60;
+      const barX = canvas.width * 0.85;
+      const barY = canvas.height * 0.2;
+      
+      for (let i = 0; i < barCount; i++) {
+        // サイン波でアニメーションする高さ
+        const height = (Math.sin(Date.now() * 0.001 + i * 0.5) * 0.3 + 0.7) * barMaxHeight;
+        
+        ctx.fillStyle = `rgba(0, 172, 193, ${0.3 + i * 0.1})`;
+        ctx.fillRect(
+          barX + i * (barWidth + barGap),
+          barY - height,
+          barWidth,
+          height
+        );
+      }
+      
+      // 円グラフ（左下）
+      const pieX = canvas.width * 0.2;
+      const pieY = canvas.height * 0.75;
+      const pieRadius = 40;
+      
+      // アニメーションするスライス
+      const sliceCount = 4;
+      const timeOffset = Date.now() * 0.0005;
+      
+      for (let i = 0; i < sliceCount; i++) {
+        const startAngle = (i / sliceCount) * Math.PI * 2 + timeOffset;
+        const endAngle = ((i + 1) / sliceCount) * Math.PI * 2 + timeOffset;
+        
+        ctx.fillStyle = `rgba(30, 136, 229, ${0.4 + i * 0.1})`;
+        ctx.beginPath();
+        ctx.moveTo(pieX, pieY);
+        ctx.arc(pieX, pieY, pieRadius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fill();
+      }
+      
+      // 線グラフ（右下）
+      ctx.strokeStyle = 'rgba(100, 255, 218, 0.8)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      
+      const lineStartX = canvas.width * 0.65;
+      const lineEndX = canvas.width * 0.95;
+      const lineY = canvas.height * 0.8;
+      const lineHeight = 50;
+      
+      // 上昇トレンドの線グラフを描画（なめらかな曲線）
+      ctx.moveTo(lineStartX, lineY);
+      
+      const pointCount = 10;
+      for (let i = 1; i <= pointCount; i++) {
+        const x = lineStartX + (lineEndX - lineStartX) * (i / pointCount);
+        // 時間経過でアニメーションする曲線
+        const offset = Math.sin(i * 0.5 + Date.now() * 0.001) * 10;
+        const trend = (i / pointCount) * lineHeight * 0.8; // 上昇傾向
+        const y = lineY - trend - offset;
+        
+        // 滑らかな曲線を描画するための制御点
+        if (i === 1) {
+          ctx.lineTo(x, y);
+        } else {
+          // 前の点との中間点を使用
+          const prevX = lineStartX + (lineEndX - lineStartX) * ((i - 1) / pointCount);
+          const prevOffset = Math.sin((i - 1) * 0.5 + Date.now() * 0.001) * 10;
+          const prevTrend = ((i - 1) / pointCount) * lineHeight * 0.8;
+          const prevY = lineY - prevTrend - prevOffset;
+          
+          const cpX = (prevX + x) / 2;
+          ctx.quadraticCurveTo(cpX, prevY, x, y);
+        }
+      }
+      
+      ctx.stroke();
+      
+      // 散布図（左上）
+      const scatterX = canvas.width * 0.25;
+      const scatterY = canvas.height * 0.3;
+      const scatterSize = 50;
+      
+      for (let i = 0; i < 15; i++) {
+        // 時間によって位置が変わる散布点
+        const angle = (i / 15) * Math.PI * 2 + Date.now() * 0.0003;
+        const distance = Math.sin(i * 3.7 + Date.now() * 0.0005) * scatterSize;
+        
+        const dotX = scatterX + Math.cos(angle) * distance;
+        const dotY = scatterY + Math.sin(angle) * distance;
+        const dotSize = 2 + Math.sin(i + Date.now() * 0.001) * 1;
+        
+        ctx.fillStyle = `rgba(100, 255, 218, ${0.5 + Math.sin(i) * 0.2})`;
+        ctx.beginPath();
+        ctx.arc(dotX, dotY, dotSize, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      // グローバルな透明度を元に戻す
+      ctx.globalAlpha = 1.0;
+    }
+    
+    // 転送進捗状況表示
+    function drawTransferProgress(ctx: CanvasRenderingContext2D) {
+      const progress = Math.min(99, (Date.now() - analysisStartTime) / 50);
+      const timeElapsed = (Date.now() - analysisStartTime) / 1000;
+      
+      // 背景バー
+      ctx.fillStyle = 'rgba(10, 30, 66, 0.6)';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+      ctx.fillRect(canvas.width * 0.1, canvas.height - 40, canvas.width * 0.8, 20);
+      
+      // シャドウリセット
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      
+      // 洗練された進捗バー
+      const progressGradient = ctx.createLinearGradient(
+        canvas.width * 0.1, 0,
+        canvas.width * 0.9, 0
+      );
+      progressGradient.addColorStop(0, 'rgba(30, 136, 229, 0.8)');
+      progressGradient.addColorStop(0.5, 'rgba(0, 172, 193, 0.9)');
+      progressGradient.addColorStop(1, 'rgba(100, 255, 218, 0.8)');
+      
+      ctx.fillStyle = progressGradient;
+      
+      // 進捗バー（スムーズに）
+      const barWidth = canvas.width * 0.8 * (progress / 100);
+      ctx.fillRect(
+        canvas.width * 0.1, 
+        canvas.height - 40, 
+        barWidth, 
+        20
+      );
+      
+      // エレガントなグロー効果
+      const glowPos = canvas.width * 0.1 + barWidth;
+      const glowGradient = ctx.createRadialGradient(
+        glowPos, canvas.height - 30, 0,
+        glowPos, canvas.height - 30, 20
+      );
+      glowGradient.addColorStop(0, 'rgba(100, 255, 218, 0.6)');
+      glowGradient.addColorStop(1, 'rgba(100, 255, 218, 0)');
+      
+      ctx.fillStyle = glowGradient;
+      ctx.fillRect(glowPos - 20, canvas.height - 45, 40, 30);
+      
+      // 洗練された進捗テキスト - ビジネスライク
+      ctx.font = '12px "Segoe UI", Arial, sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.textAlign = 'center';
+      
+      // 進捗テキスト
+      ctx.fillText(
+        `データ転送進捗: ${Math.floor(progress)}%`, 
+        canvas.width / 2, 
+        canvas.height - 25
+      );
+      
+      // 転送時間表示
+      ctx.font = '10px "Segoe UI", Arial, sans-serif';
+      ctx.fillText(
+        `経過時間: ${timeElapsed.toFixed(1)}秒`, 
+        canvas.width / 2, 
+        canvas.height - 10
+      );
+      
+      // 追加情報表示 - 転送速度
+      ctx.textAlign = 'left';
+      ctx.fillStyle = 'rgba(100, 255, 218, 0.9)';
+      ctx.fillText(
+        `転送速度: ${Math.floor(30 + Math.sin(Date.now() * 0.001) * 5)} MB/s`, 
+        canvas.width * 0.1, 
+        canvas.height - 55
+      );
+      
+      // 追加情報表示 - 残り時間
+      const remainingTime = (100 - progress) / (progress / timeElapsed);
+      ctx.textAlign = 'right';
+      ctx.fillText(
+        `残り時間: ${remainingTime > 0 ? remainingTime.toFixed(1) : 0}秒`, 
+        canvas.width * 0.9, 
+        canvas.height - 55
+      );
+    }
+    
     // アニメーションループ関数
     function animate() {
       if (!canvas || !ctx) return;
@@ -227,124 +1008,146 @@ export default function Home() {
       // キャンバスをクリア
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // 背景の薄いグリッド
-      ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)';
-      ctx.lineWidth = 0.5;
+      // 洗練されたグラデーション背景
+      const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      bgGradient.addColorStop(0, '#050c1a');
+      bgGradient.addColorStop(1, '#091832');
+      ctx.fillStyle = bgGradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // グリッド描画
-      for (let y = 0; y < canvas.height; y += 20) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
+      // バックグラウンドレイヤー
+      drawDigitalNoise(ctx);
+      drawFuturisticGrid(ctx);
+      drawAnalyticsBackground(ctx);
       
-      for (let x = 0; x < canvas.width; x += 20) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
+      // ビジネス分析と戦略の接続
+      drawFuturisticConnection(ctx, sourceX, centerY, targetX, centerY);
       
-      // 商談分析エージェントのアイコン
-      ctx.beginPath();
-      ctx.arc(sourceX, centerY, 30, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(0, 255, 255, 0.8)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
+      // ノード描画 - エンタープライズ分析と戦略
+      drawBusinessNode(ctx, sourceX, centerY, 50, 'source');
+      drawBusinessNode(ctx, targetX, centerY, 50, 'target');
       
-      // 商談分析アイコン内のグラフィック
-      ctx.beginPath();
-      ctx.moveTo(sourceX - 10, centerY);
-      ctx.lineTo(sourceX - 10, centerY + 10);
-      ctx.lineTo(sourceX, centerY - 5);
-      ctx.lineTo(sourceX + 10, centerY + 15);
-      ctx.strokeStyle = 'rgba(0, 255, 255, 0.9)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      
-      // 戦略エージェントのアイコン
-      ctx.beginPath();
-      ctx.arc(targetX, centerY, 30, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0, 150, 255, 0.2)';
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(0, 150, 255, 0.8)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      
-      // 戦略エージェントアイコン内のグラフィック
-      ctx.beginPath();
-      ctx.moveTo(targetX - 15, centerY);
-      ctx.lineTo(targetX + 15, centerY);
-      ctx.moveTo(targetX, centerY - 15);
-      ctx.lineTo(targetX, centerY + 15);
-      ctx.strokeStyle = 'rgba(0, 150, 255, 0.9)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      
-      // 接続線
-      ctx.beginPath();
-      ctx.moveTo(sourceX + 30, centerY);
-      ctx.lineTo(targetX - 30, centerY);
-      ctx.strokeStyle = 'rgba(0, 200, 255, 0.3)';
-      ctx.lineWidth = 3;
-      ctx.stroke();
-      
-      // 脈動するエフェクト
-      const pulseSize = Math.sin(Date.now() * 0.005) * 5 + 45;
-      
-      // 脈エフェクト描画
-      ctx.beginPath();
-      ctx.arc(sourceX, centerY, pulseSize, 0, Math.PI * 2);
-      const gradient1 = ctx.createRadialGradient(sourceX, centerY, 30, sourceX, centerY, pulseSize);
-      gradient1.addColorStop(0, 'rgba(0, 255, 255, 0.2)');
-      gradient1.addColorStop(1, 'rgba(0, 255, 255, 0)');
-      ctx.fillStyle = gradient1;
-      ctx.fill();
-      
-      ctx.beginPath();
-      ctx.arc(targetX, centerY, pulseSize, 0, Math.PI * 2);
-      const gradient2 = ctx.createRadialGradient(targetX, centerY, 30, targetX, centerY, pulseSize);
-      gradient2.addColorStop(0, 'rgba(0, 150, 255, 0.2)');
-      gradient2.addColorStop(1, 'rgba(0, 150, 255, 0)');
-      ctx.fillStyle = gradient2;
-      ctx.fill();
-      
-      // データパケットの描画
+      // ビジネスデータパケット描画 - データの流れ
       for (let i = 0; i < localPackets.length; i++) {
         const packet = localPackets[i];
         
-        // パケットを移動
-        packet.x += packet.speed;
+        // パケットを移動（スムーズな速度変化）
+        packet.x += packet.speed * (1 + Math.sin(Date.now() * 0.0005) * 0.2);
         if (packet.x > 1) {
+          // 端に到達したらリセット
           packet.x = Math.random() * 0.1;
+          packet.y = Math.random(); // Y位置もリセット
+          packet.size = Math.random() * 5 + 2;
+          packet.speed = Math.random() * 0.01 + 0.005;
         }
         
+        // 実際の画面上の位置を計算（よりスムーズなカーブを描く）
         const xPos = sourceX + (targetX - sourceX) * packet.x;
-        const yPos = centerY + (packet.y - 0.5) * 80;
         
-        // パケットを描画
-        ctx.beginPath();
-        ctx.arc(xPos, yPos, packet.size, 0, Math.PI * 2);
+        // 斜めのデータフロー効果のために中心から広がるような動き
+        const amplitude = 40 + Math.sin(packet.x * Math.PI) * 20;
+        const yPos = centerY + (packet.y - 0.5) * amplitude;
         
-        // 進行度合いによって色を変える
-        const alpha = 0.7 + (packet.x * 0.3);
-        const blueVal = 200 + Math.floor(packet.x * 55);
-        
-        ctx.fillStyle = `rgba(0, ${blueVal}, 255, ${alpha})`;
-        ctx.fill();
-        
-        // 光るエフェクト
-        ctx.beginPath();
-        ctx.arc(xPos, yPos, packet.size * 2, 0, Math.PI * 2);
-        const gradient = ctx.createRadialGradient(xPos, yPos, 0, xPos, yPos, packet.size * 2);
-        gradient.addColorStop(0, `rgba(0, ${blueVal}, 255, 0.3)`);
-        gradient.addColorStop(1, 'rgba(0, 255, 255, 0)');
-        ctx.fillStyle = gradient;
-        ctx.fill();
+        // ビジネスデータパケット描画
+        drawBusinessDataPacket(ctx, xPos, yPos, packet.size, packet.x);
       }
+      
+      // 転送進捗状況 - プロフェッショナルな表示
+      drawTransferProgress(ctx);
+      
+      // エンタープライズUI要素
+      // タイトルと時間
+      ctx.font = 'bold 16px "Segoe UI", Arial, sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.textAlign = 'center';
+      ctx.fillText('エンタープライズデータ転送システム', canvas.width / 2, 25);
+      
+      // サブタイトル
+      ctx.font = '12px "Segoe UI", Arial, sans-serif';
+      ctx.fillStyle = 'rgba(100, 255, 218, 0.8)';
+      ctx.fillText('ビジネス戦略最適化プロセス', canvas.width / 2, 45);
+      
+      // 現在時刻 - ビジネス風
+      const now = new Date();
+      ctx.font = '12px "Segoe UI", Arial, sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.textAlign = 'right';
+      ctx.fillText(
+        `${now.toLocaleTimeString()}`, 
+        canvas.width - 15, 
+        25
+      );
+      
+      // 日付表示
+      ctx.fillText(
+        `${now.toLocaleDateString('ja-JP')}`, 
+        canvas.width - 15, 
+        45
+      );
+      
+      // バージョン情報 - プロフェッショナル
+      ctx.textAlign = 'left';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.fillText('Enterprise Edition v4.2.1', 15, 25);
+      
+      // 企業用ステータス
+      ctx.fillStyle = 'rgba(100, 255, 218, 0.8)';
+      ctx.fillText('セキュア転送モード: アクティブ', 15, 45);
+      
+      // テクニカルステータス表示（右上）
+      ctx.textAlign = 'right';
+      ctx.font = '10px "Segoe UI", Arial, sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      
+      // 転送状況の詳細 - 近未来的
+      const statusTexts = [
+        `プロトコル: ENTERPRISE-TCP/TLS`,
+        `暗号化: AES-256-GCM`,
+        `サーバー: ビジネスエンジン-${Math.floor(Math.random() * 900 + 100)}`,
+        `帯域幅: ${Math.floor(40 + Math.sin(Date.now() * 0.0003) * 10)} Mbps`
+      ];
+      
+      statusTexts.forEach((text, i) => {
+        ctx.fillText(text, canvas.width - 15, 70 + i * 15);
+      });
+      
+      // コーナーの装飾エレメント - 企業風
+      // 左下コーナー
+      ctx.strokeStyle = 'rgba(30, 136, 229, 0.5)';
+      ctx.lineWidth = 2;
+      const cornerSize = 30;
+      
+      // 左下
+      ctx.beginPath();
+      ctx.moveTo(5, canvas.height - 5);
+      ctx.lineTo(5, canvas.height - cornerSize);
+      ctx.moveTo(5, canvas.height - 5);
+      ctx.lineTo(cornerSize, canvas.height - 5);
+      ctx.stroke();
+      
+      // 右下
+      ctx.beginPath();
+      ctx.moveTo(canvas.width - 5, canvas.height - 5);
+      ctx.lineTo(canvas.width - 5, canvas.height - cornerSize);
+      ctx.moveTo(canvas.width - 5, canvas.height - 5);
+      ctx.lineTo(canvas.width - cornerSize, canvas.height - 5);
+      ctx.stroke();
+      
+      // 左上
+      ctx.beginPath();
+      ctx.moveTo(5, 5);
+      ctx.lineTo(5, cornerSize);
+      ctx.moveTo(5, 5);
+      ctx.lineTo(cornerSize, 5);
+      ctx.stroke();
+      
+      // 右上
+      ctx.beginPath();
+      ctx.moveTo(canvas.width - 5, 5);
+      ctx.lineTo(canvas.width - 5, cornerSize);
+      ctx.moveTo(canvas.width - 5, 5);
+      ctx.lineTo(canvas.width - cornerSize, 5);
+      ctx.stroke();
       
       // アニメーションを継続
       if (isDataTransferring) {
@@ -357,13 +1160,13 @@ export default function Home() {
     
     // クリーンアップ関数
     return () => {
-      console.log("データ転送アニメーション停止");
+      console.log("近未来的ビジネススタイルデータ転送アニメーション停止");
       if (transferAnimationFrameRef.current) {
         cancelAnimationFrame(transferAnimationFrameRef.current);
         transferAnimationFrameRef.current = null;
       }
     };
-  }, [isDataTransferring, dataPackets]);
+  }, [isDataTransferring, dataPackets, analysisStartTime]);
 
   // データ転送完了時にスライド最適化フェーズに移行するための監視
   useEffect(() => {
@@ -1036,11 +1839,16 @@ export default function Home() {
                   
                   <div className="pt-4">
                     <div className="flex justify-between items-center">
-                      <div className="w-full bg-black/30 h-3 rounded-full overflow-hidden">
-                        <div className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 animate-pulse-width"></div>
+                      <div className="w-full enterprise-progress-container rounded-sm overflow-hidden shadow-lg">
+                        <div 
+                          className="h-full enterprise-progress-bar"
+                          style={{ width: `${Math.min(99, (Date.now() - analysisStartTime) / 50)}%` }}
+                        >
+                          <div className="enterprise-progress-glow"></div>
+                        </div>
                       </div>
                       <div className="ml-4 text-cyan-400 text-lg whitespace-nowrap">
-                        <div className="animate-pulse">データ転送中...</div>
+                        <div className="enterprise-text">データ転送中...</div>
                       </div>
                     </div>
                   </div>
@@ -1232,40 +2040,69 @@ export default function Home() {
         @keyframes pulse-width {
           0% { width: 0%; }
           50% { width: 70%; }
-          90% { width: 90%; }
-          100% { width: 100%; }
+          90% { width: 95%; }
+          100% { width: 0%; }
         }
         
         .animate-pulse-width {
-          animation: pulse-width 5s forwards;
+          animation: pulse-width 1.5s ease-in-out infinite;
         }
         
-        @keyframes scanline {
-          0% { left: -100%; }
-          100% { left: 100%; }
+        /* 新しい近未来的エンタープライズスタイル */
+        .enterprise-progress-container {
+          height: 10px;
+          background: linear-gradient(90deg, rgba(10, 20, 40, 0.8), rgba(15, 30, 60, 0.9), rgba(10, 20, 40, 0.8));
+          border: 1px solid rgba(30, 136, 229, 0.3);
+          box-shadow: 0 0 10px rgba(0, 172, 193, 0.2), inset 0 0 5px rgba(0, 0, 0, 0.5);
         }
         
-        @keyframes pulse {
-          0% { transform: scale(1); opacity: 0.8; }
-          50% { transform: scale(1.1); opacity: 1; }
-          100% { transform: scale(1); opacity: 0.8; }
+        .enterprise-progress-bar {
+          height: 100%;
+          background: linear-gradient(90deg, 
+            rgba(30, 136, 229, 0.9), 
+            rgba(0, 172, 193, 1), 
+            rgba(100, 255, 218, 0.9),
+            rgba(0, 172, 193, 1), 
+            rgba(30, 136, 229, 0.9));
+          background-size: 200% 100%;
+          animation: gradient-x 3s linear infinite;
+          position: relative;
+          overflow: hidden;
         }
         
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
+        .enterprise-progress-glow {
+          position: absolute;
+          top: 0;
+          right: 0;
+          height: 100%;
+          width: 20px;
+          background: linear-gradient(90deg, 
+            rgba(100, 255, 218, 0), 
+            rgba(100, 255, 218, 0.8));
+          filter: blur(4px);
+          opacity: 0.8;
         }
         
-        @keyframes ping-slow {
-          0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.4; }
-          50% { transform: translate(-50%, -50%) scale(1); opacity: 0.2; }
-          100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.4; }
+        .enterprise-text {
+          font-family: 'Segoe UI', Arial, sans-serif;
+          font-weight: 500;
+          letter-spacing: 0.5px;
+          text-shadow: 0 0 10px rgba(0, 172, 193, 0.8);
+          position: relative;
+          display: inline-block;
         }
         
-        @keyframes moveBar {
-          0% { height: 5%; }
-          50% { height: 70%; }
-          100% { height: 5%; }
+        .enterprise-text::after {
+          content: '';
+          position: absolute;
+          bottom: -2px;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(90deg,
+            rgba(100, 255, 218, 0),
+            rgba(100, 255, 218, 0.8),
+            rgba(100, 255, 218, 0));
         }
       `}</style>
     </div>
