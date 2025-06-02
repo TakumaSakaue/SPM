@@ -476,35 +476,56 @@ export default function FaceAnalyzer({ onFaceDetected }: FaceAnalyzerProps) {
       if (containerRef.current) {
         // サイドバーの幅を画面幅の35%として計算
         const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
         const sidebarWidth = Math.floor(screenWidth * 0.35); // 35%のサイドバー幅
         const padding = 48; // 左右のパディング合計 (px)
         const rightMargin = 40; // 右側の余白 (px)
+        const headerHeight = 80; // ヘッダーの高さ (px)
+        const bottomMargin = 120; // 下部の余白と他の要素のための余白 (px)
         
         // 使用可能な最大幅を計算（メインコンテンツエリア = 65%から余白を除く）
         const availableWidth = screenWidth - sidebarWidth - padding - rightMargin;
+        // 使用可能な最大高さを計算
+        const availableHeight = screenHeight - headerHeight - bottomMargin;
         
         // 画面サイズに応じた適切な幅を設定
         let width;
         if (screenWidth <= 768) {
           // モバイル: より小さなサイズ
-          width = Math.max(320, Math.min(600, availableWidth));
+          width = Math.max(320, Math.min(500, availableWidth));
         } else if (screenWidth <= 1024) {
           // タブレット: 中程度のサイズ
-          width = Math.max(480, Math.min(800, availableWidth));
+          width = Math.max(480, Math.min(700, availableWidth));
         } else {
           // デスクトップ: より大きなサイズ
-          width = Math.max(640, Math.min(1000, availableWidth));
+          width = Math.max(640, Math.min(900, availableWidth));
         }
         
         // 16:9のアスペクト比を使用（より映像に適したワイドなアスペクト比）
-        const height = width * 9 / 16;
+        let height = width * 9 / 16;
         
-        setDimensions({ width, height });
+        // 高さが利用可能な高さを超える場合は、高さを基準に幅を再計算
+        if (height > availableHeight) {
+          height = availableHeight;
+          width = height * 16 / 9;
+          
+          // 再計算された幅が利用可能な幅を超える場合は、さらに調整
+          if (width > availableWidth) {
+            width = availableWidth;
+            height = width * 9 / 16;
+          }
+        }
+        
+        // 最小サイズの保証
+        width = Math.max(320, width);
+        height = Math.max(180, height);
+        
+        setDimensions({ width: Math.floor(width), height: Math.floor(height) });
         
         // キャンバスのサイズも更新
         if (canvasRef.current) {
-          canvasRef.current.width = width;
-          canvasRef.current.height = height;
+          canvasRef.current.width = Math.floor(width);
+          canvasRef.current.height = Math.floor(height);
         }
       }
     };
@@ -677,7 +698,10 @@ export default function FaceAnalyzer({ onFaceDetected }: FaceAnalyzerProps) {
       
       {/* 感情状態表示 */}
       {detectedFace && (
-        <div className="w-full max-w-[1120px] mx-auto bg-black/70 backdrop-blur-md rounded-xl p-4 border border-cyan-500/30">
+        <div 
+          className="bg-black/70 backdrop-blur-md rounded-xl p-4 border border-cyan-500/30"
+          style={{ width: dimensions.width }}
+        >
           <div className="flex justify-between items-center mb-3 border-b border-cyan-500/30 pb-2">
             <h3 className="text-cyan-400 text-sm font-bold">FACIAL ANALYSIS RESULTS</h3>
             <span className="text-cyan-400 text-xs">{new Date().toLocaleTimeString()}</span>
@@ -726,12 +750,15 @@ export default function FaceAnalyzer({ onFaceDetected }: FaceAnalyzerProps) {
       
       {/* エラーメッセージ */}
       {error && (
-        <div className="mt-2 text-sm text-red-400 bg-black/70 backdrop-blur-md p-4 rounded-xl w-full max-w-[1120px] mx-auto border border-red-500/30">
+        <div 
+          className="mt-2 text-sm text-red-400 bg-black/70 backdrop-blur-md p-4 rounded-xl border border-red-500/30"
+          style={{ width: dimensions.width }}
+        >
           <h3 className="text-red-400 text-xs font-bold mb-2">SYSTEM ERROR</h3>
-          <p>{error}</p>
+          <p className="text-sm leading-relaxed">{error}</p>
           <button 
             onClick={handleRequestCamera}
-            className="mt-2 px-4 py-2 bg-red-500/20 backdrop-blur-sm text-white rounded-lg hover:bg-red-500/30 transition-colors border border-red-500/30 text-xs"
+            className="mt-3 px-4 py-2 bg-red-500/20 backdrop-blur-sm text-white rounded-lg hover:bg-red-500/30 transition-colors border border-red-500/30 text-xs font-medium"
           >
             RETRY CAMERA ACCESS
           </button>
@@ -740,7 +767,10 @@ export default function FaceAnalyzer({ onFaceDetected }: FaceAnalyzerProps) {
       
       {/* 読み込み中表示 */}
       {!isModelLoaded && !error && (
-        <div className="mt-2 text-sm text-cyan-400 bg-black/70 backdrop-blur-md p-4 rounded-xl w-full max-w-[1120px] mx-auto border border-cyan-500/30">
+        <div 
+          className="mt-2 text-sm text-cyan-400 bg-black/70 backdrop-blur-md p-4 rounded-xl border border-cyan-500/30"
+          style={{ width: dimensions.width }}
+        >
           <div className="flex items-center">
             <div className="animate-spin mr-2 h-4 w-4 border-2 border-cyan-400 border-t-transparent rounded-full"></div>
             <span>LOADING FACIAL RECOGNITION MODELS...</span>
@@ -749,7 +779,10 @@ export default function FaceAnalyzer({ onFaceDetected }: FaceAnalyzerProps) {
       )}
       
       {isModelLoaded && !isStreamStarted && !error && (
-        <div className="mt-2 text-sm text-cyan-400 bg-black/70 backdrop-blur-md p-4 rounded-xl w-full max-w-[1120px] mx-auto border border-cyan-500/30">
+        <div 
+          className="mt-2 text-sm text-cyan-400 bg-black/70 backdrop-blur-md p-4 rounded-xl border border-cyan-500/30"
+          style={{ width: dimensions.width }}
+        >
           <div className="flex items-center">
             <div className="animate-pulse mr-2 h-4 w-4 bg-cyan-400 rounded-full"></div>
             <span>INITIALIZING CAMERA...</span>

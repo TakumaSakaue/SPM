@@ -616,33 +616,33 @@ export default function Home() {
               {/* 自然言語での分析結果 */}
               <div className="space-y-3 text-xs">
                 <div className="bg-black/30 rounded-lg p-3 border border-cyan-500/10">
-                  <div className="text-cyan-300 font-medium mb-2">現在の感情状態</div>
-                  <p className="text-gray-200 leading-relaxed">
+                  <div className="text-cyan-300 font-medium mb-2 text-xs">現在の感情状態</div>
+                  <p className="text-gray-200 leading-relaxed text-xs">
                     {detectedFace ? (
                       currentEmotion === 'neutral' ? 
-                        "お客様は冷静で中立的な表情をされています。情報を慎重に検討している可能性があります。" : 
+                        "お客様は冷静で中立的な表情をされています。情報を慎重に検討している可能性があります。このような状態は、お客様が提案内容について真剣に考えている証拠でもあります。論理的で具体的な説明が効果的でしょう。" : 
                       currentEmotion === 'happy' ? 
-                        "お客様は明るい表情で、提案に対して前向きな印象を受けています。好感触です。" : 
+                        "お客様は明るい表情で、提案に対して前向きな印象を受けています。好感触です。笑顔が見られ、リラックスした状態で話を聞いてくださっています。このまま具体的な提案に進むタイミングが適切と判断されます。" : 
                       currentEmotion === 'sad' ? 
-                        "お客様に少し困惑や不安の表情が見られます。懸念点について丁寧に説明することをお勧めします。" : 
+                        "お客様に少し困惑や不安の表情が見られます。懸念点について丁寧に説明することをお勧めします。表情から判断すると、何らかの課題や心配事を抱えている可能性があります。お客様の立場に立った共感的なアプローチが重要です。" : 
                       currentEmotion === 'angry' ? 
-                        "お客様に不満や反対の兆候が見られます。一度話を整理し、お客様の懸念を聞くことが重要です。" :
+                        "お客様に不満や反対の兆候が見られます。一度話を整理し、お客様の懸念を聞くことが重要です。眉間にしわが寄り、口元が固くなっています。現在の提案内容に対して強い反発を感じている可能性があります。" :
                       currentEmotion === 'fearful' ? 
-                        "お客様に不安や心配の表情が見られます。安心感を与える説明や実績の提示が効果的です。" :
+                        "お客様に不安や心配の表情が見られます。安心感を与える説明や実績の提示が効果的です。目元に緊張が見られ、決定に対する不安を感じている様子です。信頼関係の構築とリスク軽減の説明が必要です。" :
                       currentEmotion === 'disgusted' ? 
-                        "お客様に否定的な反応が見られます。アプローチを変更し、お客様の価値観に合った提案を検討してください。" :
+                        "お客様に否定的な反応が見られます。アプローチを変更し、お客様の価値観に合った提案を検討してください。現在の提案が期待とは大きく異なっている可能性があります。お客様のニーズを再確認することが急務です。" :
                       currentEmotion === 'surprised' ? 
-                        "お客様が驚きの表情をされています。新しい情報に対する関心の表れかもしれません。" : 
-                        "感情状態を分析中です。"
+                        "お客様が驚きの表情をされています。新しい情報に対する関心の表れかもしれません。目を見開き、予想外の内容に反応している様子です。この機会を活かして、さらに詳細な情報提供や具体例の説明が効果的でしょう。" : 
+                        "現在、感情状態の詳細分析を実行中です。表情の微細な変化や目線の動きを総合的に解析し、最適な営業戦略を立案しています。"
                     ) : (
-                      "カメラで顔を検出中です。正面を向いてお座りください。"
+                      "現在、カメラシステムで顔の検出を行っています。正面を向いてお座りください。感情分析システムが最適に機能するため、明るい照明の下で、カメラから適切な距離（約50cm〜1m）を保ってください。髪の毛や手で顔が隠れないよう注意し、自然な表情でいてください。検出が完了次第、リアルタイムでお客様の感情状態を分析し、最適な営業戦略をご提案いたします。"
                     )}
                   </p>
                 </div>
 
                 {/* 推奨アクション */}
                 <div className="bg-gradient-to-r from-cyan-900/30 to-blue-900/30 rounded-lg p-3 border border-cyan-500/20">
-                  <div className="text-cyan-300 font-medium mb-2 flex items-center">
+                  <div className="text-cyan-300 font-medium mb-2 flex items-center text-xs">
                     <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -650,16 +650,16 @@ export default function Home() {
                   </div>
                   <p className="text-gray-300 text-xs leading-relaxed">
                     {currentEmotion === 'neutral' ? 
-                      "具体的な数値や事例を用いて、より詳細な説明を行いましょう。" :
+                      "具体的な数値や事例を用いて、より詳細な説明を行いましょう。データに基づいた論理的なアプローチが効果的です。" :
                     currentEmotion === 'happy' ? 
-                      "この調子で話を進め、具体的な導入プランの提案に移りましょう。" :
+                      "この調子で話を進め、具体的な導入プランの提案に移りましょう。契約条件や実装スケジュールについて話し合うタイミングです。" :
                     currentEmotion === 'sad' || currentEmotion === 'fearful' ? 
-                      "お客様の不安要素を聞き出し、丁寧にフォローアップしましょう。" :
+                      "お客様の不安要素を聞き出し、丁寧にフォローアップしましょう。質問を促し、懸念点を一つずつ解決していくことが重要です。" :
                     currentEmotion === 'angry' || currentEmotion === 'disgusted' ? 
-                      "一度話題を変更し、お客様のニーズを再確認することをお勧めします。" :
+                      "一度話題を変更し、お客様のニーズを再確認することをお勧めします。現在の提案を見直し、お客様の期待に沿った内容に修正が必要です。" :
                     currentEmotion === 'surprised' ? 
-                      "関心を示されているので、詳細な資料やデモの提案が効果的です。" :
-                      "お客様の反応を注意深く観察し、適切なタイミングで質問しましょう。"}
+                      "関心を示されているので、詳細な資料やデモの提案が効果的です。この機会を活かして、より深い情報提供を行いましょう。" :
+                      "お客様の反応を注意深く観察し、適切なタイミングで質問しましょう。表情の変化を見逃さないよう継続的にモニタリングします。"}
                   </p>
                 </div>
               </div>
@@ -673,21 +673,21 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
                 </div>
-                <h4 className="text-purple-400 text-sm font-bold">CRISTAL AI 連携</h4>
+                <h4 className="text-purple-400 text-xs font-bold">CRISTAL AI 連携</h4>
               </div>
               
               {/* AI分析レポート */}
               <div className="space-y-3 text-xs">
                 <div className="bg-black/30 rounded-lg p-3 border border-purple-500/10">
-                  <div className="text-purple-300 font-medium mb-2">AI戦略分析</div>
-                  <p className="text-gray-200 leading-relaxed">
+                  <div className="text-purple-300 font-medium mb-2 text-xs">AI戦略分析</div>
+                  <p className="text-gray-200 leading-relaxed text-xs">
                     現在の商談データから、お客様は技術的な詳細よりもビジネス価値に関心を示しています。
                     ROI重視のアプローチが効果的と判定されています。
                   </p>
                 </div>
 
                 <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg p-3 border border-purple-500/20">
-                  <div className="text-purple-300 font-medium mb-2 flex items-center">
+                  <div className="text-purple-300 font-medium mb-2 flex items-center text-xs">
                     <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
@@ -699,28 +699,8 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div className="bg-black/20 rounded-lg p-2 text-center">
-                    <div className="text-purple-300 font-medium">{aiConfidence}%</div>
-                    <div className="text-gray-400 text-xs">AI信頼度</div>
-                  </div>
-                  
-                  <div className="bg-black/20 rounded-lg p-2 text-center">
-                    <div className="text-purple-300 font-medium">{progressValues.main}%</div>
-                    <div className="text-gray-400 text-xs">処理進捗</div>
-                  </div>
-                  
-                  <div className="bg-black/20 rounded-lg p-2 text-center">
-                    <div className="text-green-400 font-medium flex items-center justify-center">
-                      <div className="w-1 h-1 bg-green-400 rounded-full mr-1 animate-pulse"></div>
-                      ON
-                    </div>
-                    <div className="text-gray-400 text-xs">接続状態</div>
-                  </div>
-                </div>
-
                 <div className="bg-black/30 rounded-lg p-3 border border-purple-500/10">
-                  <div className="text-purple-300 font-medium mb-2">次のアクション予測</div>
+                  <div className="text-purple-300 font-medium mb-2 text-xs">次のアクション予測</div>
                   <p className="text-gray-200 text-xs leading-relaxed">
                     5分以内に価格に関する質問が想定されます。事前に準備された
                     価格提案資料の準備をお勧めします。
