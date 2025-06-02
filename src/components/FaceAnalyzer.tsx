@@ -474,16 +474,27 @@ export default function FaceAnalyzer({ onFaceDetected }: FaceAnalyzerProps) {
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
-        // サイドバーの幅（最小値280px）と画面の余白（40px）を考慮して最大幅を計算
-        // 画面幅から考慮する余白: サイドバー + 左右のパディング + 右側の余白
-        const sidebarWidth = 280; // サイドバーの最小幅
+        // サイドバーの幅を画面幅の35%として計算
+        const screenWidth = window.innerWidth;
+        const sidebarWidth = Math.floor(screenWidth * 0.35); // 35%のサイドバー幅
         const padding = 48; // 左右のパディング合計 (px)
         const rightMargin = 40; // 右側の余白 (px)
         
-        // 使用可能な最大幅を計算
-        const availableWidth = window.innerWidth - sidebarWidth - padding - rightMargin;
-        // 最大値は1120px、最小値は640pxとする
-        const width = Math.max(640, Math.min(1120, availableWidth));
+        // 使用可能な最大幅を計算（メインコンテンツエリア = 65%から余白を除く）
+        const availableWidth = screenWidth - sidebarWidth - padding - rightMargin;
+        
+        // 画面サイズに応じた適切な幅を設定
+        let width;
+        if (screenWidth <= 768) {
+          // モバイル: より小さなサイズ
+          width = Math.max(320, Math.min(600, availableWidth));
+        } else if (screenWidth <= 1024) {
+          // タブレット: 中程度のサイズ
+          width = Math.max(480, Math.min(800, availableWidth));
+        } else {
+          // デスクトップ: より大きなサイズ
+          width = Math.max(640, Math.min(1000, availableWidth));
+        }
         
         // 16:9のアスペクト比を使用（より映像に適したワイドなアスペクト比）
         const height = width * 9 / 16;

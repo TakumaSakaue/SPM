@@ -92,6 +92,34 @@ type EmotionDashboardProps = {
 export default function EmotionDashboard({ currentEmotion, allEmotions }: EmotionDashboardProps) {
   const [chartData, setChartData] = useState<EmotionData[]>([])
   const [historyData, setHistoryData] = useState<{ time: string, emotion: Emotion }[]>([])
+  const [maxWidth, setMaxWidth] = useState<number>(1000)
+
+  // 最大幅を動的に計算
+  useEffect(() => {
+    const updateMaxWidth = () => {
+      const screenWidth = window.innerWidth;
+      const sidebarWidth = Math.floor(screenWidth * 0.35); // 35%のサイドバー幅
+      const padding = 48; // 左右のパディング合計
+      const margin = 40; // 余白
+      
+      // 使用可能な幅を計算
+      const availableWidth = screenWidth - sidebarWidth - padding - margin;
+      
+      // レスポンシブな最大幅を設定
+      if (screenWidth <= 768) {
+        setMaxWidth(Math.min(600, availableWidth));
+      } else if (screenWidth <= 1024) {
+        setMaxWidth(Math.min(800, availableWidth));
+      } else {
+        setMaxWidth(Math.min(1000, availableWidth));
+      }
+    };
+
+    updateMaxWidth();
+    window.addEventListener('resize', updateMaxWidth);
+
+    return () => window.removeEventListener('resize', updateMaxWidth);
+  }, []);
 
   // 表示用の感情データを生成
   useEffect(() => {
@@ -124,7 +152,10 @@ export default function EmotionDashboard({ currentEmotion, allEmotions }: Emotio
   }
 
   return (
-    <div className="bg-white/40 backdrop-blur-md rounded-2xl shadow-lg p-6 transition-all duration-300 border border-gray-200/20 w-full max-w-[1120px] mx-auto">
+    <div 
+      className="bg-white/40 backdrop-blur-md rounded-2xl shadow-lg p-6 transition-all duration-300 border border-gray-200/20 w-full mx-auto"
+      style={{ maxWidth: `${maxWidth}px` }}
+    >
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold">感情分析ダッシュボード</h2>
         <div className="flex items-center">

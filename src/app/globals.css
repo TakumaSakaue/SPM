@@ -2,6 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ブラウザのデフォルトマージンとパディングをリセット */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100%;
+  height: 100%;
+}
+
+/* Next.jsのデフォルトスタイルをリセット */
+#__next, [data-nextjs-scroll-focus-boundary] {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 余白を完全になくす */
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 :root {
   --foreground-rgb: 30, 41, 59;
   --background-rgb: 248, 250, 252;
