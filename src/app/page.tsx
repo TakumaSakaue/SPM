@@ -22,7 +22,7 @@ const PresentationSlide = dynamic(
     ssr: false,
     loading: () => (
       <div className="flex justify-center items-center h-full bg-white/10 backdrop-blur-md animate-pulse rounded-2xl">
-        <p className="text-gray-500">資料を読み込み中...</p>
+        <p className="text-gray-500">スライドを読み込み中...</p>
       </div>
     )
   }
@@ -164,14 +164,8 @@ export default function Home() {
   // 球体アニメーションのコントロール
   const handleCristalClick = () => {
     setIsModalOpen(true)
-    setIsAnalyzing(true)
-    setAnalysisStartTime(Date.now())
-    
-    // 5秒後に分析完了とする
-    setTimeout(() => {
-      setIsAnalyzing(false)
-      setAnalysisComplete(true)
-    }, 5000)
+    // 分析完了画面を表示（プランニング実行ボタンが表示される）
+    setAnalysisComplete(true)
   }
 
   // モーダルを閉じる処理
@@ -218,31 +212,13 @@ export default function Home() {
 
   // データ転送アニメーションを開始
   const startDataTransfer = () => {
-    setIsDataTransferring(true)
-    setDataTransferComplete(false)
-    
-    // 初期データパケットを生成
-    const newPackets = []
-    for (let i = 0; i < 30; i++) {
-      newPackets.push({
-        x: Math.random() * 0.3,
-        y: Math.random(),
-        size: Math.random() * 5 + 2,
-        speed: Math.random() * 0.01 + 0.005
-      })
-    }
-    setDataPackets(newPackets)
-    
-    // 5秒後にアニメーション完了
-    setTimeout(() => {
-      setIsDataTransferring(false)
-      setDataTransferComplete(true)
-      
-      // スライド最適化フェーズに移行
-      setTimeout(() => {
-        setIsSlideOptimizing(true)
-      }, 500)
-    }, 5000)
+    console.log('プランニング実行ボタンがクリックされました')
+    // 分析完了状態をリセット
+    setAnalysisComplete(false)
+    // 直接スライド最適化フェーズに移行
+    setDataTransferComplete(true)
+    setIsSlideOptimizing(true)
+    console.log('スライド最適化フェーズに移行しました')
   }
 
   // スライド最適化完了時の処理
@@ -769,6 +745,8 @@ export default function Home() {
               <img src="/CRISTAL.png" alt="CRISTAL" className="w-full h-full object-cover pointer-events-none" />
             </button>
           </div>
+
+
         </div>
       </div>
 
@@ -880,6 +858,7 @@ export default function Home() {
                   </div>
                   <PresentationSlide 
                     isVisible={true} 
+                    currentEmotion={currentEmotion}
                     onComplete={handleSlideOptimizationComplete}
                   />
                 </div>
