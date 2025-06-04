@@ -16,7 +16,7 @@ const FaceAnalyzer = dynamic(
   }
 )
 
-const PresentationSlide = dynamic(
+const ConsultingSlide = dynamic(
   () => import('@/components/ConsultingSlide'),
   { 
     ssr: false,
@@ -856,7 +856,7 @@ export default function Home() {
                     <h3 className="text-2xl font-bold text-cyan-400">スライド最適化フェーズ</h3>
                     <p className="text-cyan-300 mt-2">顧客ニーズに合わせた資料の自動最適化を行っています</p>
                   </div>
-                  <PresentationSlide 
+                  <ConsultingSlide 
                     isVisible={true} 
                     currentEmotion={currentEmotion}
                     onComplete={handleSlideOptimizationComplete}
