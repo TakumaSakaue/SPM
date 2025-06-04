@@ -17,12 +17,12 @@ const FaceAnalyzer = dynamic(
 )
 
 const PresentationSlide = dynamic(
-  () => import('@/components/PresentationSlide'),
+  () => import('@/components/ConsultingSlide'),
   { 
     ssr: false,
     loading: () => (
       <div className="flex justify-center items-center h-full bg-white/10 backdrop-blur-md animate-pulse rounded-2xl">
-        <p className="text-gray-500">スライドを読み込み中...</p>
+        <p className="text-gray-500">コンサルティングスライドを読み込み中...</p>
       </div>
     )
   }
