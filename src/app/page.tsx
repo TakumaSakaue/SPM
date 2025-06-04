@@ -28,6 +28,18 @@ const ConsultingSlide = dynamic(
   }
 )
 
+const StarrySphere = dynamic(
+  () => import('@/components/StarrySphere'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="flex justify-center items-center h-32 bg-black/30 rounded-lg">
+        <div className="w-8 h-8 rounded-full border-2 border-purple-500/20 border-t-purple-500 animate-spin"></div>
+      </div>
+    )
+  }
+)
+
 export default function Home() {
   // 状態管理
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true)
@@ -52,6 +64,9 @@ export default function Home() {
   const transferAnimationFrameRef = useRef<number | null>(null)
   const [analysisStartTime, setAnalysisStartTime] = useState<number>(0)
   const [isSlideOptimizing, setIsSlideOptimizing] = useState<boolean>(false)
+
+  // メッセージフィールドの状態管理
+  const [messageText, setMessageText] = useState<string>('')
 
   // Hydrationエラー対策の状態管理
   const [aiConfidence, setAiConfidence] = useState<number>(85)
@@ -535,7 +550,7 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ margin: 0, padding: 0, width: '100vw' }}>
       {/* ページヘッダー */}
-      <header className="bg-black/40 backdrop-blur-md border-b border-cyan-500/30 shadow-lg relative z-40 w-full" style={{ margin: 0, padding: 0, width: '100vw', left: 0, right: 0 }}>
+      <header className="bg-black/70 backdrop-blur-md border-b border-cyan-500/30 shadow-lg fixed top-0 left-0 right-0 z-40 w-full" style={{ margin: 0, padding: 0, width: '100vw' }}>
         <div className="w-full py-4 px-6">
           <div className="flex items-center justify-between">
             {/* タイトル */}
@@ -564,11 +579,11 @@ export default function Home() {
       </header>
 
       {/* メインコンテンツエリア */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden pt-24">
         {/* サイドバー */}
         <div 
           ref={sidebarRef}
-          className="flex-shrink-0 overflow-y-auto bg-black/20 backdrop-blur-md border-r border-cyan-500/20"
+          className="flex-shrink-0 overflow-y-auto border-r border-cyan-500/20"
           style={{ 
             width: isSidebarOpen ? `${sidebarWidth}px` : '0px',
             transition: 'width 0.3s ease',
@@ -578,7 +593,7 @@ export default function Home() {
           {/* サイドバーのコンテンツ */}
           <div className="p-4 space-y-4 h-full mt-2 overflow-y-auto">
             {/* リアルタイム感情分析ウィンドウ */}
-            <div className="bg-black/40 backdrop-blur-md rounded-lg border border-cyan-500/20 p-4 hover:border-cyan-400/30 transition-all duration-300">
+            <div className="bg-black/70 backdrop-blur-md rounded-lg border border-cyan-500/20 p-4 hover:border-cyan-400/30 transition-all duration-300">
               <div className="flex items-center mb-3">
                 <div className="w-5 h-5 mr-2 rounded-md bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
                   <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -611,7 +626,7 @@ export default function Home() {
                         "お客様が驚きの表情をされています。新しい情報に対する関心の表れかもしれません。目を見開き、予想外の内容に反応している様子です。この機会を活かして、さらに詳細な情報提供や具体例の説明が効果的でしょう。" : 
                         "現在、感情状態の詳細分析を実行中です。表情の微細な変化や目線の動きを総合的に解析し、最適な営業戦略を立案しています。"
                     ) : (
-                      "現在、カメラシステムで顔の検出を行っています。正面を向いてお座りください。感情分析システムが最適に機能するため、明るい照明の下で、カメラから適切な距離（約50cm〜1m）を保ってください。髪の毛や手で顔が隠れないよう注意し、自然な表情でいてください。検出が完了次第、リアルタイムでお客様の感情状態を分析し、最適な営業戦略をご提案いたします。"
+                      "現在、カメラシステムで顔の検出を行っています。正面を向いてお座りください。感情分析システムが最適に機能するため、明るい照明の下で、カメラから適切な距離（約50cm〜1m）を保ってください。髪の毛や手で顔が隠れないよう注意し、自然な表情でいてください。"
                     )}
                   </p>
                 </div>
@@ -642,7 +657,7 @@ export default function Home() {
             </div>
 
             {/* Cristal連携ウィンドウ */}
-            <div className="bg-black/40 backdrop-blur-md rounded-lg border border-purple-500/20 p-4 hover:border-purple-400/30 transition-all duration-300">
+            <div className="bg-black/70 backdrop-blur-md rounded-lg border border-purple-500/20 p-4 hover:border-purple-400/30 transition-all duration-300">
               <div className="flex items-center mb-3">
                 <div className="w-5 h-5 mr-2 rounded-md bg-gradient-to-br from-purple-400 to-pink-600 flex items-center justify-center">
                   <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -654,33 +669,52 @@ export default function Home() {
               
               {/* AI分析レポート */}
               <div className="space-y-3 text-xs">
-                <div className="bg-black/30 rounded-lg p-3 border border-purple-500/10">
-                  <div className="text-purple-300 font-medium mb-2 text-xs">AI戦略分析</div>
-                  <p className="text-gray-200 leading-relaxed text-xs">
-                    現在の商談データから、お客様は技術的な詳細よりもビジネス価値に関心を示しています。
-                    ROI重視のアプローチが効果的と判定されています。
-                  </p>
-                </div>
-
-                <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg p-3 border border-purple-500/20">
-                  <div className="text-purple-300 font-medium mb-2 flex items-center text-xs">
-                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                    推奨戦略
+                {/* 球体アニメーション */}
+                <div className="bg-black/30 rounded-lg p-4 border border-purple-500/10 flex flex-col items-center justify-center">
+                  <div className="w-48 h-48">
+                    <StarrySphere />
                   </div>
-                  <p className="text-gray-300 text-xs leading-relaxed">
-                    具体的なコスト削減効果を数値で示し、競合他社との差別化ポイントを
-                    明確に説明することで、成約確度を向上させることができます。
-                  </p>
                 </div>
 
-                <div className="bg-black/30 rounded-lg p-3 border border-purple-500/10">
-                  <div className="text-purple-300 font-medium mb-2 text-xs">次のアクション予測</div>
-                  <p className="text-gray-200 text-xs leading-relaxed">
-                    5分以内に価格に関する質問が想定されます。事前に準備された
-                    価格提案資料の準備をお勧めします。
-                  </p>
+                {/* メッセージフィールド */}
+                <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded-lg p-3 border border-purple-500/20">
+                  <div className="text-purple-300 font-medium mb-2 text-xs flex items-center">
+                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    AIへの指示
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <textarea
+                      value={messageText}
+                      onChange={(e) => setMessageText(e.target.value)}
+                      placeholder="CRISTALに質問や指示を入力..."
+                      className="w-full h-12 bg-black/40 border border-purple-500/30 rounded p-2 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-purple-400/60 focus:ring-1 focus:ring-purple-400/30 resize-none"
+                      rows={2}
+                    />
+                    
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => {
+                          if (messageText.trim()) {
+                            console.log('CRISTALへの指示:', messageText)
+                            setMessageText('')
+                          }
+                        }}
+                        disabled={!messageText.trim()}
+                        className="flex-1 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white text-xs font-medium rounded transition-all"
+                      >
+                        送信
+                      </button>
+                      <button
+                        onClick={() => setMessageText('')}
+                        className="px-3 py-1.5 bg-black/40 hover:bg-black/60 text-purple-300 text-xs rounded transition-all border border-purple-500/30"
+                      >
+                        クリア
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
