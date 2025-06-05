@@ -629,7 +629,7 @@ export default function Home() {
     setCristalAnalysisText('')
   }
 
-  // CRISTALローディングアニメーション
+  // CRISTAL ホログラフィック・プロジェクション アニメーション
   useEffect(() => {
     if (cristalInputState !== 'loading' || !cristalLoadingCanvasRef.current) return
     
@@ -641,84 +641,200 @@ export default function Home() {
     canvas.height = canvas.clientHeight
     
     let animationTime = 0
-    const particles: Array<{x: number, y: number, vx: number, vy: number, size: number, life: number}> = []
+    const centerX = canvas.width / 2
+    const centerY = canvas.height / 2
     
-    // パーティクル生成
-    for (let i = 0; i < 50; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 2,
-        vy: (Math.random() - 0.5) * 2,
+    // ホログラフィック・パーティクル群
+    const hologramParticles: Array<{
+      x: number, y: number, z: number, 
+      vx: number, vy: number, vz: number,
+      size: number, opacity: number, 
+      hue: number, spiralAngle: number
+    }> = []
+    
+    // データストリーム・パーティクル
+    const dataStreams: Array<{
+      angle: number, radius: number, speed: number,
+      size: number, opacity: number, hue: number
+    }> = []
+    
+    // ホログラム・パーティクル初期化
+    for (let i = 0; i < 150; i++) {
+      hologramParticles.push({
+        x: centerX + (Math.random() - 0.5) * 200,
+        y: centerY + (Math.random() - 0.5) * 200,
+        z: Math.random() * 100,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        vz: (Math.random() - 0.5) * 0.3,
+        size: Math.random() * 2 + 0.5,
+        opacity: Math.random() * 0.8 + 0.2,
+        hue: 200 + Math.random() * 80, // 青紫系
+        spiralAngle: Math.random() * Math.PI * 2
+      })
+    }
+    
+    // データストリーム初期化
+    for (let i = 0; i < 32; i++) {
+      dataStreams.push({
+        angle: (i / 32) * Math.PI * 2,
+        radius: 60 + Math.random() * 40,
+        speed: 0.02 + Math.random() * 0.03,
         size: Math.random() * 3 + 1,
-        life: Math.random()
+        opacity: Math.random() * 0.6 + 0.4,
+        hue: 180 + Math.random() * 100
       })
     }
     
     const animate = () => {
       if (cristalInputState !== 'loading') return
       
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'
+      // 深い透明背景でトレイル効果
+      ctx.fillStyle = 'rgba(0, 5, 15, 0.15)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
       
-      animationTime += 0.02
+      animationTime += 0.016
       
-      // 回転する外側のリング
-      const centerX = canvas.width / 2
-      const centerY = canvas.height / 2
-      const radius = Math.min(canvas.width, canvas.height) * 0.3
+      // ホログラフィック・スキャンライン
+      const scanLineY = centerY + Math.sin(animationTime * 2) * 80
+      const scanGradient = ctx.createLinearGradient(0, scanLineY - 20, 0, scanLineY + 20)
+      scanGradient.addColorStop(0, 'rgba(0, 200, 255, 0)')
+      scanGradient.addColorStop(0.5, `rgba(0, 200, 255, ${Math.sin(animationTime * 3) * 0.3 + 0.6})`)
+      scanGradient.addColorStop(1, 'rgba(0, 200, 255, 0)')
       
+      ctx.fillStyle = scanGradient
+      ctx.fillRect(0, scanLineY - 20, canvas.width, 40)
+      
+      // グリッチ効果のための背景ノイズ
+      for (let i = 0; i < 20; i++) {
+        const glitchX = Math.random() * canvas.width
+        const glitchY = Math.random() * canvas.height
+        const glitchIntensity = Math.sin(animationTime * 10 + i) * 0.1 + 0.1
+        
+        ctx.fillStyle = `rgba(0, ${50 + Math.random() * 100}, 255, ${glitchIntensity})`
+        ctx.fillRect(glitchX, glitchY, Math.random() * 10 + 2, Math.random() * 3 + 1)
+      }
+      
+      // CRISTALロゴの3D回転投影
       ctx.save()
       ctx.translate(centerX, centerY)
-      ctx.rotate(animationTime)
       
-      // 外側リング
-      ctx.beginPath()
-      ctx.arc(0, 0, radius, 0, Math.PI * 2)
-      ctx.strokeStyle = `rgba(147, 51, 234, ${Math.sin(animationTime * 2) * 0.3 + 0.7})`
-      ctx.lineWidth = 3
-      ctx.stroke()
+      // 3D変換マトリックス
+      const rotX = Math.sin(animationTime * 0.7) * 0.3
+      const rotY = animationTime * 0.5
+      const rotZ = Math.sin(animationTime * 0.3) * 0.2
       
-      // 内側リング（逆回転）
-      ctx.rotate(-animationTime * 2)
-      ctx.beginPath()
-      ctx.arc(0, 0, radius * 0.7, 0, Math.PI * 2)
-      ctx.strokeStyle = `rgba(219, 39, 119, ${Math.cos(animationTime * 3) * 0.3 + 0.7})`
+      // ホログラフィック・グラデーション
+      const logoGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 60)
+      logoGradient.addColorStop(0, `hsla(220, 100%, 70%, ${Math.sin(animationTime * 2) * 0.3 + 0.7})`)
+      logoGradient.addColorStop(0.6, `hsla(260, 80%, 60%, ${Math.cos(animationTime * 1.5) * 0.2 + 0.5})`)
+      logoGradient.addColorStop(1, 'hsla(300, 60%, 50%, 0.2)')
+      
+      ctx.fillStyle = logoGradient
+      ctx.font = 'bold 24px monospace'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      
+      // 投影変換で3D効果
+      const scale = 1 + Math.sin(animationTime) * 0.1
+      ctx.scale(scale, scale * Math.cos(rotX))
+      ctx.rotate(rotY)
+      
+      // グロー効果
+      ctx.shadowColor = 'rgba(0, 200, 255, 0.8)'
+      ctx.shadowBlur = 20
+      ctx.fillText('CRISTAL', 0, 0)
+      ctx.shadowBlur = 0
+      
+      // アウトライン
+      ctx.strokeStyle = `hsla(200, 100%, 80%, ${Math.sin(animationTime * 3) * 0.3 + 0.7})`
       ctx.lineWidth = 2
-      ctx.stroke()
+      ctx.strokeText('CRISTAL', 0, 0)
       
       ctx.restore()
       
-      // パーティクル描画・更新
-      particles.forEach(particle => {
-        particle.x += particle.vx
-        particle.y += particle.vy
-        particle.life -= 0.01
+      // ホログラム・パーティクル更新・描画
+      hologramParticles.forEach((particle, index) => {
+        // 螺旋運動
+        particle.spiralAngle += 0.05
+        particle.x += particle.vx + Math.cos(particle.spiralAngle) * 0.5
+        particle.y += particle.vy + Math.sin(particle.spiralAngle) * 0.5
+        particle.z += particle.vz
         
-        if (particle.life <= 0 || particle.x < 0 || particle.x > canvas.width || particle.y < 0 || particle.y > canvas.height) {
-          particle.x = Math.random() * canvas.width
-          particle.y = Math.random() * canvas.height
-          particle.life = 1
+        // 境界チェック・リセット
+        if (particle.x < -50 || particle.x > canvas.width + 50 || 
+            particle.y < -50 || particle.y > canvas.height + 50 ||
+            particle.z < 0 || particle.z > 100) {
+          particle.x = centerX + (Math.random() - 0.5) * 200
+          particle.y = centerY + (Math.random() - 0.5) * 200
+          particle.z = Math.random() * 100
         }
         
-        const alpha = particle.life
+        // ホログラフィック・レンダリング
+        const depth = (particle.z / 100)
+        const finalSize = particle.size * (0.5 + depth * 0.5)
+        const finalOpacity = particle.opacity * (0.3 + depth * 0.7) * Math.sin(animationTime * 2 + index * 0.1) * 0.5 + 0.5
+        
+        // スキャンライン干渉効果
+        const scanDistortion = Math.abs(particle.y - scanLineY) < 40 ? 
+          Math.sin(animationTime * 15) * 0.3 + 0.7 : 1
+        
+        ctx.save()
+        ctx.globalAlpha = finalOpacity * scanDistortion
+        
+        // パーティクルグラデーション
+        const particleGradient = ctx.createRadialGradient(
+          particle.x, particle.y, 0,
+          particle.x, particle.y, finalSize * 3
+        )
+        particleGradient.addColorStop(0, `hsla(${particle.hue}, 80%, 70%, 0.9)`)
+        particleGradient.addColorStop(0.7, `hsla(${particle.hue + 20}, 70%, 60%, 0.4)`)
+        particleGradient.addColorStop(1, 'hsla(0, 0%, 0%, 0)')
+        
+        ctx.fillStyle = particleGradient
         ctx.beginPath()
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(168, 85, 247, ${alpha})`
+        ctx.arc(particle.x, particle.y, finalSize, 0, Math.PI * 2)
         ctx.fill()
+        
+        ctx.restore()
       })
       
-      // データストリーム
-      const streamY = centerY + Math.sin(animationTime * 4) * 20
-      ctx.beginPath()
-      ctx.moveTo(0, streamY)
-      for (let x = 0; x < canvas.width; x += 10) {
-        const y = streamY + Math.sin(animationTime * 3 + x * 0.01) * 10
-        ctx.lineTo(x, y)
-      }
-      ctx.strokeStyle = `rgba(236, 72, 153, ${Math.sin(animationTime * 5) * 0.4 + 0.6})`
-      ctx.lineWidth = 2
-      ctx.stroke()
+      // データストリーム螺旋
+      dataStreams.forEach((stream, index) => {
+        stream.angle += stream.speed
+        
+        const x = centerX + Math.cos(stream.angle) * stream.radius
+        const y = centerY + Math.sin(stream.angle) * stream.radius
+        const depth = Math.sin(stream.angle * 2) * 0.5 + 0.5
+        
+        ctx.save()
+        ctx.globalAlpha = stream.opacity * depth
+        
+        const streamGradient = ctx.createRadialGradient(x, y, 0, x, y, stream.size * 2)
+        streamGradient.addColorStop(0, `hsla(${stream.hue}, 90%, 80%, 0.9)`)
+        streamGradient.addColorStop(1, 'hsla(0, 0%, 0%, 0)')
+        
+        ctx.fillStyle = streamGradient
+        ctx.beginPath()
+        ctx.arc(x, y, stream.size * (0.5 + depth * 0.5), 0, Math.PI * 2)
+        ctx.fill()
+        
+        // ストリーム接続線
+        if (index > 0) {
+          const prevStream = dataStreams[index - 1]
+          const prevX = centerX + Math.cos(prevStream.angle) * prevStream.radius
+          const prevY = centerY + Math.sin(prevStream.angle) * prevStream.radius
+          
+          ctx.strokeStyle = `hsla(${stream.hue}, 70%, 60%, ${depth * 0.3})`
+          ctx.lineWidth = 1
+          ctx.beginPath()
+          ctx.moveTo(prevX, prevY)
+          ctx.lineTo(x, y)
+          ctx.stroke()
+        }
+        
+        ctx.restore()
+      })
       
       cristalLoadingAnimationRef.current = requestAnimationFrame(animate)
     }
@@ -914,20 +1030,60 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* ローディング情報 */}
-                    <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg p-4 border border-purple-500/20">
+                    {/* ホログラフィック・ローディング情報 */}
+                    <div className="bg-gradient-to-r from-cyan-900/20 to-blue-900/30 rounded-lg p-4 border border-cyan-400/30 shadow-lg shadow-cyan-500/20">
                       <div className="text-center space-y-3">
-                        <h5 className="text-purple-300 font-bold text-sm">CRISTAL ANALYZING...</h5>
-                        <p className="text-purple-200 text-xs">{cristalAnalysisText}</p>
+                        <h5 className="text-cyan-300 font-bold text-sm tracking-wider font-mono">
+                          🔮 HOLOGRAPHIC PROJECTION ACTIVE
+                        </h5>
+                        <p className="text-cyan-200 text-xs leading-relaxed">
+                          {cristalAnalysisText}
+                        </p>
                         
-                        {/* プログレスバー */}
-                        <div className="w-full bg-black/40 rounded-full h-2 overflow-hidden">
+                        {/* ホログラフィック・プログレスバー */}
+                        <div className="relative w-full bg-black/50 rounded-full h-3 overflow-hidden border border-cyan-500/30">
                           <div 
-                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300 ease-out"
+                            className="h-full bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 transition-all duration-300 ease-out relative"
                             style={{ width: `${cristalLoadingProgress}%` }}
+                          >
+                            {/* グロー効果 */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-cyan-300/60 to-blue-300/60 animate-pulse"></div>
+                          </div>
+                          
+                          {/* スキャンライン効果 */}
+                          <div 
+                            className="absolute top-0 h-full w-1 bg-white/80 shadow-lg shadow-cyan-400/50"
+                            style={{ 
+                              left: `${cristalLoadingProgress}%`,
+                              transition: 'left 0.3s ease-out'
+                            }}
                           ></div>
                         </div>
-                        <div className="text-purple-300 text-xs font-mono">{Math.round(cristalLoadingProgress)}%</div>
+                        
+                        <div className="flex justify-between items-center">
+                          <div className="text-cyan-400 text-xs font-mono">
+                            PROJECTION: {Math.round(cristalLoadingProgress)}%
+                          </div>
+                          <div className="text-blue-300 text-xs">
+                            ✨ AI Neural Sync
+                          </div>
+                        </div>
+                        
+                        {/* ホログラム・ステータス・インジケーター */}
+                        <div className="flex justify-center space-x-4 mt-3">
+                          <div className="flex items-center space-x-1">
+                            <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
+                            <span className="text-cyan-300 text-xs">SCAN</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                            <span className="text-blue-300 text-xs">ANALYZE</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                            <span className="text-purple-300 text-xs">PROJECT</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
