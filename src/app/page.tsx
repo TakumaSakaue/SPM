@@ -68,6 +68,14 @@ export default function Home() {
   // メッセージフィールドの状態管理
   const [messageText, setMessageText] = useState<string>('')
 
+  // CRISTAL推奨アクション状態管理
+  const [cristalInputState, setCristalInputState] = useState<'input' | 'loading' | 'results'>('input')
+  const [recommendedActions, setRecommendedActions] = useState<Array<{title: string, reason: string}>>([])
+  const [cristalLoadingProgress, setCristalLoadingProgress] = useState<number>(0)
+  const [cristalAnalysisText, setCristalAnalysisText] = useState<string>('')
+  const cristalLoadingCanvasRef = useRef<HTMLCanvasElement>(null)
+  const cristalLoadingAnimationRef = useRef<number | null>(null)
+
   // Hydrationエラー対策の状態管理
   const [aiConfidence, setAiConfidence] = useState<number>(85)
   const [progressValues, setProgressValues] = useState({
@@ -191,6 +199,8 @@ export default function Home() {
     setIsDataTransferring(false)
     setDataTransferComplete(false)
     setIsSlideOptimizing(false)
+    // CRISTAL状態もリセット
+    resetCristalState()
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current)
       animationFrameRef.current = null
@@ -198,6 +208,10 @@ export default function Home() {
     if (transferAnimationFrameRef.current) {
       cancelAnimationFrame(transferAnimationFrameRef.current)
       transferAnimationFrameRef.current = null
+    }
+    if (cristalLoadingAnimationRef.current) {
+      cancelAnimationFrame(cristalLoadingAnimationRef.current)
+      cristalLoadingAnimationRef.current = null
     }
   }
 
@@ -547,6 +561,178 @@ export default function Home() {
     }
   }, [isAnalyzing])
 
+  // 推奨アクションデータ
+  const mockRecommendedActions = [
+    {
+      title: "提案商材をTASUKIアノテーションに変更",
+      reason: "顧客の表情分析から技術的な詳細への関心が低く、視覚的な説明資料により理解促進と関心向上が期待できるため、アノテーション形式への変更を推奨します。"
+    },
+    {
+      title: "顧客課題の深掘り",
+      reason: "微細な表情変化から潜在的な不安や懸念が検出されました。現在の提案では解決しきれていない課題が存在する可能性が高いため、追加のヒアリングが効果的です。"
+    },
+    {
+      title: "資料のリアルタイムアップデート",
+      reason: "音声分析と視線追跡から、ROI部分への強い関心が確認されました。財務効果を前面に押し出した資料構成に変更することで成約確度の向上が見込めます。"
+    }
+  ]
+
+  // CRISTALメッセージ送信処理
+  const handleCristalSubmit = () => {
+    if (messageText.trim()) {
+      console.log('CRISTALへの指示:', messageText)
+      setCristalInputState('loading')
+      setCristalLoadingProgress(0)
+      setCristalAnalysisText('')
+      
+      // 4秒間のローディングアニメーション開始
+      const startTime = Date.now()
+      const loadingDuration = 4000 // 4秒
+      
+      const updateProgress = () => {
+        const elapsed = Date.now() - startTime
+        const progress = Math.min((elapsed / loadingDuration) * 100, 100)
+        setCristalLoadingProgress(progress)
+        
+        // 分析テキストの更新
+        if (progress < 25) {
+          setCristalAnalysisText('表情パターンを解析中')
+        } else if (progress < 50) {
+          setCristalAnalysisText('音声データを処理中')
+        } else if (progress < 75) {
+          setCristalAnalysisText('顧客心理を分析中')
+        } else if (progress < 100) {
+          setCristalAnalysisText('最適戦略を計算中')
+        }
+        
+        if (progress < 100) {
+          setTimeout(updateProgress, 50)
+        } else {
+          // ローディング完了後、結果表示
+          setTimeout(() => {
+            setRecommendedActions(mockRecommendedActions)
+            setCristalInputState('results')
+            setMessageText('')
+          }, 500)
+        }
+      }
+      
+      updateProgress()
+    }
+  }
+
+  // CRISTAL状態リセット
+  const resetCristalState = () => {
+    setCristalInputState('input')
+    setRecommendedActions([])
+    setCristalLoadingProgress(0)
+    setCristalAnalysisText('')
+  }
+
+  // CRISTALローディングアニメーション
+  useEffect(() => {
+    if (cristalInputState !== 'loading' || !cristalLoadingCanvasRef.current) return
+    
+    const canvas = cristalLoadingCanvasRef.current
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    
+    canvas.width = canvas.clientWidth
+    canvas.height = canvas.clientHeight
+    
+    let animationTime = 0
+    const particles: Array<{x: number, y: number, vx: number, vy: number, size: number, life: number}> = []
+    
+    // パーティクル生成
+    for (let i = 0; i < 50; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 2,
+        vy: (Math.random() - 0.5) * 2,
+        size: Math.random() * 3 + 1,
+        life: Math.random()
+      })
+    }
+    
+    const animate = () => {
+      if (cristalInputState !== 'loading') return
+      
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      
+      animationTime += 0.02
+      
+      // 回転する外側のリング
+      const centerX = canvas.width / 2
+      const centerY = canvas.height / 2
+      const radius = Math.min(canvas.width, canvas.height) * 0.3
+      
+      ctx.save()
+      ctx.translate(centerX, centerY)
+      ctx.rotate(animationTime)
+      
+      // 外側リング
+      ctx.beginPath()
+      ctx.arc(0, 0, radius, 0, Math.PI * 2)
+      ctx.strokeStyle = `rgba(147, 51, 234, ${Math.sin(animationTime * 2) * 0.3 + 0.7})`
+      ctx.lineWidth = 3
+      ctx.stroke()
+      
+      // 内側リング（逆回転）
+      ctx.rotate(-animationTime * 2)
+      ctx.beginPath()
+      ctx.arc(0, 0, radius * 0.7, 0, Math.PI * 2)
+      ctx.strokeStyle = `rgba(219, 39, 119, ${Math.cos(animationTime * 3) * 0.3 + 0.7})`
+      ctx.lineWidth = 2
+      ctx.stroke()
+      
+      ctx.restore()
+      
+      // パーティクル描画・更新
+      particles.forEach(particle => {
+        particle.x += particle.vx
+        particle.y += particle.vy
+        particle.life -= 0.01
+        
+        if (particle.life <= 0 || particle.x < 0 || particle.x > canvas.width || particle.y < 0 || particle.y > canvas.height) {
+          particle.x = Math.random() * canvas.width
+          particle.y = Math.random() * canvas.height
+          particle.life = 1
+        }
+        
+        const alpha = particle.life
+        ctx.beginPath()
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(168, 85, 247, ${alpha})`
+        ctx.fill()
+      })
+      
+      // データストリーム
+      const streamY = centerY + Math.sin(animationTime * 4) * 20
+      ctx.beginPath()
+      ctx.moveTo(0, streamY)
+      for (let x = 0; x < canvas.width; x += 10) {
+        const y = streamY + Math.sin(animationTime * 3 + x * 0.01) * 10
+        ctx.lineTo(x, y)
+      }
+      ctx.strokeStyle = `rgba(236, 72, 153, ${Math.sin(animationTime * 5) * 0.4 + 0.6})`
+      ctx.lineWidth = 2
+      ctx.stroke()
+      
+      cristalLoadingAnimationRef.current = requestAnimationFrame(animate)
+    }
+    
+    animate()
+    
+    return () => {
+      if (cristalLoadingAnimationRef.current) {
+        cancelAnimationFrame(cristalLoadingAnimationRef.current)
+        cristalLoadingAnimationRef.current = null
+      }
+    }
+  }, [cristalInputState])
+
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ margin: 0, padding: 0, width: '100vw' }}>
       {/* ページヘッダー */}
@@ -579,7 +765,7 @@ export default function Home() {
       </header>
 
       {/* メインコンテンツエリア */}
-      <div className="flex flex-1 overflow-hidden pt-24">
+      <div className="flex flex-1 overflow-hidden pt-16">
         {/* サイドバー */}
         <div 
           ref={sidebarRef}
@@ -591,7 +777,7 @@ export default function Home() {
           }}
         >
           {/* サイドバーのコンテンツ */}
-          <div className="p-4 space-y-4 h-full mt-2 overflow-y-auto">
+          <div className="p-4 space-y-4 h-full overflow-y-auto">
             {/* リアルタイム感情分析ウィンドウ */}
             <div className="bg-black/70 backdrop-blur-md rounded-lg border border-cyan-500/20 p-4 hover:border-cyan-400/30 transition-all duration-300">
               <div className="flex items-center mb-3">
@@ -669,53 +855,139 @@ export default function Home() {
               
               {/* AI分析レポート */}
               <div className="space-y-3 text-xs">
-                {/* 球体アニメーション */}
-                <div className="bg-black/30 rounded-lg p-4 border border-purple-500/10 flex flex-col items-center justify-center">
-                  <div className="w-48 h-48">
-                    <StarrySphere />
-                  </div>
-                </div>
+                {cristalInputState === 'input' && (
+                  <>
+                    {/* 球体アニメーション */}
+                    <div className="bg-black/30 rounded-lg p-4 border border-purple-500/10 flex flex-col items-center justify-center">
+                      <div className="w-48 h-48">
+                        <StarrySphere />
+                      </div>
+                    </div>
 
-                {/* メッセージフィールド */}
-                <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded-lg p-3 border border-purple-500/20">
-                  <div className="text-purple-300 font-medium mb-2 text-xs flex items-center">
-                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    AIへの指示
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <textarea
-                      value={messageText}
-                      onChange={(e) => setMessageText(e.target.value)}
-                      placeholder="CRISTALに質問や指示を入力..."
-                      className="w-full h-12 bg-black/40 border border-purple-500/30 rounded p-2 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-purple-400/60 focus:ring-1 focus:ring-purple-400/30 resize-none"
-                      rows={2}
-                    />
-                    
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => {
-                          if (messageText.trim()) {
-                            console.log('CRISTALへの指示:', messageText)
-                            setMessageText('')
-                          }
-                        }}
-                        disabled={!messageText.trim()}
-                        className="flex-1 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white text-xs font-medium rounded transition-all"
-                      >
-                        送信
-                      </button>
-                      <button
-                        onClick={() => setMessageText('')}
-                        className="px-3 py-1.5 bg-black/40 hover:bg-black/60 text-purple-300 text-xs rounded transition-all border border-purple-500/30"
-                      >
-                        クリア
-                      </button>
+                    {/* メッセージフィールド */}
+                    <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded-lg p-3 border border-purple-500/20">
+                      <div className="text-purple-300 font-medium mb-2 text-xs flex items-center">
+                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        AIへの指示
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <textarea
+                          value={messageText}
+                          onChange={(e) => setMessageText(e.target.value)}
+                          placeholder="CRISTALに質問や指示を入力..."
+                          className="w-full h-12 bg-black/40 border border-purple-500/30 rounded p-2 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-purple-400/60 focus:ring-1 focus:ring-purple-400/30 resize-none"
+                          rows={2}
+                        />
+                        
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={handleCristalSubmit}
+                            disabled={!messageText.trim()}
+                            className="flex-1 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white text-xs font-medium rounded transition-all"
+                          >
+                            送信
+                          </button>
+                          <button
+                            onClick={() => setMessageText('')}
+                            className="px-3 py-1.5 bg-black/40 hover:bg-black/60 text-purple-300 text-xs rounded transition-all border border-purple-500/30"
+                          >
+                            クリア
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {cristalInputState === 'loading' && (
+                  <div className="space-y-4">
+                    {/* ローディングアニメーション */}
+                    <div className="bg-black/30 rounded-lg p-6 border border-purple-500/10 flex flex-col items-center justify-center">
+                      <div className="relative w-48 h-48">
+                        <canvas 
+                          ref={cristalLoadingCanvasRef}
+                          className="w-full h-full rounded-lg"
+                        />
+                      </div>
+                    </div>
+
+                    {/* ローディング情報 */}
+                    <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg p-4 border border-purple-500/20">
+                      <div className="text-center space-y-3">
+                        <h5 className="text-purple-300 font-bold text-sm">CRISTAL ANALYZING...</h5>
+                        <p className="text-purple-200 text-xs">{cristalAnalysisText}</p>
+                        
+                        {/* プログレスバー */}
+                        <div className="w-full bg-black/40 rounded-full h-2 overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300 ease-out"
+                            style={{ width: `${cristalLoadingProgress}%` }}
+                          ></div>
+                        </div>
+                        <div className="text-purple-300 text-xs font-mono">{Math.round(cristalLoadingProgress)}%</div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
+
+                {cristalInputState === 'results' && (
+                  <div className="space-y-3">
+                    <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg p-3 border border-purple-500/20">
+                      <div className="flex items-center justify-between mb-3">
+                        <h5 className="text-purple-300 font-bold text-sm">推奨アクション</h5>
+                        <button
+                          onClick={resetCristalState}
+                          className="text-purple-400 hover:text-purple-300 text-xs"
+                        >
+                          戻る
+                        </button>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {recommendedActions.map((action, index) => (
+                          <div 
+                            key={index}
+                            className={`p-3 rounded-lg border transition-all duration-200 hover:scale-[1.02] cursor-pointer ${
+                              index === 0 ? 'bg-purple-900/40 border-purple-400/30 hover:border-purple-400/50' :
+                              index === 1 ? 'bg-pink-900/40 border-pink-400/30 hover:border-pink-400/50' :
+                              'bg-indigo-900/40 border-indigo-400/30 hover:border-indigo-400/50'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between mb-2">
+                              <h6 className={`font-medium text-xs ${
+                                index === 0 ? 'text-purple-300' :
+                                index === 1 ? 'text-pink-300' :
+                                'text-indigo-300'
+                              }`}>
+                                {action.title}
+                              </h6>
+                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white font-bold text-xs ${
+                                index === 0 ? 'bg-purple-500' :
+                                index === 1 ? 'bg-pink-500' :
+                                'bg-indigo-500'
+                              }`}>
+                                {index + 1}
+                              </div>
+                            </div>
+                            <p className="text-gray-300 text-xs leading-relaxed mb-3">
+                              {action.reason}
+                            </p>
+                            <button className={`w-full py-1.5 rounded text-xs font-medium transition-all ${
+                              index === 0 ? 'bg-purple-500/80 hover:bg-purple-500 text-white' :
+                              index === 1 ? 'bg-pink-500/80 hover:bg-pink-500 text-white' :
+                              'bg-indigo-500/80 hover:bg-indigo-500 text-white'
+                            }`}>
+                              実行
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -732,7 +1004,7 @@ export default function Home() {
         {/* メニューボタン - サイドバーが閉じているときのみ表示 */}
         {!isSidebarOpen && (
           <button
-            className="fixed top-24 left-4 z-50 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center hover:bg-white transition-colors duration-200"
+            className="fixed top-20 left-4 z-50 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center hover:bg-white transition-colors duration-200"
             onClick={() => setIsSidebarOpen(true)}
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -759,7 +1031,7 @@ export default function Home() {
           />
           
           <div className="container mx-auto p-4 max-w-full">
-            <div className="mt-2 pb-4">
+            <div className="pb-2">
               <FaceAnalyzer onFaceDetected={handleFaceDetection} />
             </div>
           </div>
