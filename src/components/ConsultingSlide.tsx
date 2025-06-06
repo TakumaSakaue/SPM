@@ -106,6 +106,9 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
   const [isOptimizedContentShowing, setIsOptimizedContentShowing] = useState(false);
   const [isRadarScanning, setIsRadarScanning] = useState(false);
   const [radarPosition, setRadarPosition] = useState(-10);
+  
+  // テキスト色変化用のstate
+  const [isTextGlowing, setIsTextGlowing] = useState(false);
 
   const [currentContent, setCurrentContent] = useState(manufacturingProposalContent);
   const codeLines = getCodeSnippets(currentEmotion);
@@ -179,8 +182,8 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
     setCodingComplete(false);
     setShowOptimized(false);
     
-    // 3秒でタイプライター効果を完了させる
-    const totalDuration = 3000; // 3秒
+    // 1.5秒でタイプライター効果を完了させる
+    const totalDuration = 1500; // 1.5秒
     const totalCharacters = codeLines.join('').length;
     const baseDelay = totalDuration / totalCharacters;
     
@@ -193,18 +196,33 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
 
   const typewriterEffect = (lineIndex: number, charIndex: number, displayedLines: string[], baseDelay: number = 25) => {
     if (lineIndex >= codeLines.length) {
-      // コーディング完了、直接最適化コンテンツに移行
-      console.log('タイプライター効果完了、最適化コンテンツに移行'); // デバッグ用
+      // コーディング完了、即座に最適化コンテンツに移行
+      console.log('タイプライター効果完了、最適化コンテンツに即座に移行'); // デバッグ用
       setCodingComplete(true);
       
-      // 即座に最適化されたコンテンツに変更
+      // 最適化されたコンテンツに即座に変更
       const optimizedContent = getOptimizedContent(currentEmotion);
       setCurrentContent(optimizedContent);
       setIsCoding(false);
       setCodingComplete(false);
       setShowOptimized(false);
       setIsOptimizedContentShowing(true);
-      console.log('Content optimized:', optimizedContent.title); // デバッグ用
+      
+      // 最適化後のコンテンツが表示されてからテキスト色変化を開始
+      const optimizedTextGlowTimer = setTimeout(() => {
+        setIsTextGlowing(true);
+        console.log('最適化後コンテンツのテキスト色変化開始'); // デバッグ用
+        
+        // 3秒後に色変化終了
+        const optimizedTextGlowEndTimer = setTimeout(() => {
+          setIsTextGlowing(false);
+          console.log('最適化後コンテンツのテキスト色変化終了'); // デバッグ用
+        }, 3000);
+        timeoutRefs.current.push(optimizedTextGlowEndTimer);
+      }, 500); // 0.5秒後にテキスト色変化開始
+      timeoutRefs.current.push(optimizedTextGlowTimer);
+      
+      console.log('Content optimized immediately:', optimizedContent.title); // デバッグ用
       
       return;
     }
@@ -246,31 +264,37 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
 
   if (!isVisible) return null;
 
+  // 不要になったスタイル関数は削除
+
   const renderTerminalPlaceholder = (terminalType: 'main' | 'solution') => {
+    // テキスト色変更と同タイミングでプレースホルダーの枠をシアンブルーに
+    const glowClass = isTextGlowing ? 'ring-4 ring-cyan-400 ring-opacity-75 shadow-lg shadow-cyan-400/50' : '';
+    
     if (terminalType === 'main') {
       return (
-        <div className="w-full h-full bg-black rounded-sm p-1 font-mono text-[10px] leading-3 overflow-hidden flex flex-col">
-          <div className="text-green-400 mb-1 truncate">$ python optimize.py</div>
+        <div className={`w-full h-full bg-black rounded-sm p-1 font-mono text-[10px] leading-3 overflow-hidden flex flex-col transition-all duration-500 ${glowClass}`}>
+          <div className={`mb-1 truncate transition-colors duration-500 ${isTextGlowing ? 'text-cyan-400' : 'text-green-400'}`}>$ python optimize.py</div>
           <div className="flex-1 overflow-hidden">
             {displayedCode.slice(0, 6).map((line, lineIndex) => (
               <div key={lineIndex} className="truncate">
-                <span className={
+                <span className={`transition-colors duration-500 ${
+                  isTextGlowing ? 'text-cyan-400' :
                   line.trim().startsWith('#') ? 'text-gray-400' :
                   line.includes('def ') ? 'text-yellow-400' :
                   line.includes('=') ? 'text-green-400' :
                   line.includes('"') ? 'text-red-400' :
                   'text-white'
-                }>
+                }`}>
                   {line.length > 35 ? line.substring(0, 32) + '...' : line}
                 </span>
                 {lineIndex === currentLineIndex && !codingComplete && (
-                  <span className="bg-green-400 text-black animate-pulse">_</span>
+                  <span className={`animate-pulse ${isTextGlowing ? 'bg-cyan-400 text-black' : 'bg-green-400 text-black'}`}>_</span>
                 )}
               </div>
             ))}
           </div>
           {showOptimized && (
-            <div className="text-cyan-400 mt-1 animate-pulse truncate text-[9px]">
+            <div className={`mt-1 animate-pulse truncate text-[9px] transition-colors duration-500 ${isTextGlowing ? 'text-cyan-400' : 'text-cyan-400'}`}>
               ✅ Content optimized!
             </div>
           )}
@@ -278,14 +302,14 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
       );
     } else {
       return (
-        <div className="w-full h-full bg-black rounded-sm p-1 font-mono text-[10px] leading-3 overflow-hidden flex flex-col">
-          <div className="text-green-400 mb-1 truncate">$ generate_solution.py</div>
-          <div className="text-cyan-400 truncate">Analyzing emotion...</div>
-          <div className="text-yellow-400 truncate">emotion = "{currentEmotion.toUpperCase()}"</div>
+        <div className={`w-full h-full bg-black rounded-sm p-1 font-mono text-[10px] leading-3 overflow-hidden flex flex-col transition-all duration-500 ${glowClass}`}>
+          <div className={`mb-1 truncate transition-colors duration-500 ${isTextGlowing ? 'text-cyan-400' : 'text-green-400'}`}>$ generate_solution.py</div>
+          <div className={`truncate transition-colors duration-500 ${isTextGlowing ? 'text-cyan-400' : 'text-cyan-400'}`}>Analyzing emotion...</div>
+          <div className={`truncate transition-colors duration-500 ${isTextGlowing ? 'text-cyan-400' : 'text-yellow-400'}`}>emotion = "{currentEmotion.toUpperCase()}"</div>
           {codingComplete && (
             <div className="flex-1 flex flex-col justify-between">
-              <div className="text-white truncate">strategy = "optimized"</div>
-              <div className="text-green-400 animate-pulse truncate text-[9px]">
+              <div className={`truncate transition-colors duration-500 ${isTextGlowing ? 'text-cyan-400' : 'text-white'}`}>strategy = "optimized"</div>
+              <div className={`animate-pulse truncate text-[9px] transition-colors duration-500 ${isTextGlowing ? 'text-cyan-400' : 'text-green-400'}`}>
                 ✅ Solution generated!
               </div>
             </div>
@@ -299,6 +323,7 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
     <>
       
       <div className={`w-full h-full bg-white ${isAnimating ? 'opacity-50' : 'opacity-100'} transition-all duration-300 relative flex flex-col`}>
+
       {/* レーダースキャンアニメーション */}
       {isRadarScanning && (
         <>
@@ -309,8 +334,8 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
               className="absolute w-full transition-all duration-[5000ms] ease-out"
               style={{
                 height: '10px',
-                background: 'linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.2) 10%, rgba(0, 255, 255, 0.6) 30%, rgba(0, 255, 255, 1) 50%, rgba(0, 255, 255, 0.6) 70%, rgba(0, 255, 255, 0.2) 90%, transparent 100%)',
-                boxShadow: '0 0 20px rgba(0, 255, 255, 0.8), 0 0 40px rgba(0, 255, 255, 0.5), 0 0 60px rgba(0, 255, 255, 0.3)',
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255, 0, 0, 0.2) 10%, rgba(255, 0, 0, 0.6) 30%, rgba(255, 0, 0, 1) 50%, rgba(255, 0, 0, 0.6) 70%, rgba(255, 0, 0, 0.2) 90%, transparent 100%)',
+                boxShadow: '0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.5), 0 0 60px rgba(255, 0, 0, 0.3)',
                 top: `${radarPosition}%`,
                 left: 0,
                 right: 0
@@ -321,7 +346,7 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
                 className="absolute w-full -top-3"
                 style={{
                   height: '16px',
-                  background: 'linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.1) 20%, rgba(0, 255, 255, 0.4) 40%, rgba(0, 255, 255, 0.6) 50%, rgba(0, 255, 255, 0.4) 60%, rgba(0, 255, 255, 0.1) 80%, transparent 100%)',
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(255, 0, 0, 0.1) 20%, rgba(255, 0, 0, 0.4) 40%, rgba(255, 0, 0, 0.6) 50%, rgba(255, 0, 0, 0.4) 60%, rgba(255, 0, 0, 0.1) 80%, transparent 100%)',
                   filter: 'blur(5px)'
                 }}
               />
@@ -330,7 +355,7 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
                 className="absolute w-full -top-5"
                 style={{
                   height: '20px',
-                  background: 'linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.05) 30%, rgba(0, 255, 255, 0.2) 45%, rgba(0, 255, 255, 0.3) 50%, rgba(0, 255, 255, 0.2) 55%, rgba(0, 255, 255, 0.05) 70%, transparent 100%)',
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(255, 0, 0, 0.05) 30%, rgba(255, 0, 0, 0.2) 45%, rgba(255, 0, 0, 0.3) 50%, rgba(255, 0, 0, 0.2) 55%, rgba(255, 0, 0, 0.05) 70%, transparent 100%)',
                   filter: 'blur(10px)'
                 }}
               />
@@ -338,15 +363,15 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
           </div>
           
           {/* レーダースキャン中のインジケーター */}
-          <div className="absolute top-4 right-4 z-[110] bg-cyan-500 text-white px-3 py-1 rounded-full text-sm animate-pulse shadow-lg">
+          <div className="absolute top-4 right-4 z-[110] bg-red-500 text-white px-3 py-1 rounded-full text-sm animate-pulse shadow-lg">
             🔍 AI深層分析中... (位置: {radarPosition.toFixed(0)}%)
           </div>
         </>
       )}
 
-      {/* 最適化されたコンテンツ表示中のインジケーター */}
+      {/* 最適化されたコンテンツ表示中のインジケーター - パルス効果付き */}
       {isOptimizedContentShowing && (
-        <div className="absolute top-4 right-4 z-10 bg-green-500 text-white px-3 py-1 rounded-full text-sm animate-pulse">
+        <div className="absolute top-4 right-4 z-10 bg-green-500 text-white px-3 py-1 rounded-full text-sm animate-pulse shadow-lg border-2 border-green-300">
           ✅ AI最適化されたコンテンツを表示中
         </div>
       )}
@@ -356,7 +381,9 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
         {/* ヘッダー */}
         <div className="px-8 py-6 border-b border-gray-300">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-gray-800">{currentContent.title}</h1>
+            <h1 className={`text-3xl font-bold text-gray-800 transition-all duration-500 ${isOptimizedContentShowing ? 'text-blue-600 animate-pulse' : ''}`}>
+              {currentContent.title}
+            </h1>
             <img 
               src="/SBLOGO.png" 
               alt="SoftBank Logo" 
@@ -372,14 +399,22 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
           </p>
         </div>
 
-        {/* メインコンテンツ - 3列レイアウト */}
+        {/* メインコンテンツ - 3列レイアウト - フェードイン効果付き */}
         <div className="px-8 py-4 grid grid-cols-3 gap-6 flex-1 overflow-hidden">
           {/* 左側：導入阻害要因 */}
           <div className="flex flex-col h-full">
             <h3 className="text-xl font-semibold text-gray-700 mb-3 text-center">導入阻害要因</h3>
             <div className="flex flex-col space-y-2 flex-1 overflow-hidden">
               {currentContent.factors.map((factor, index) => (
-                <div key={factor.id} className="bg-blue-100 border border-blue-200 p-3 rounded flex-1 flex items-center">
+                <div 
+                  key={factor.id} 
+                  className={`bg-blue-100 border border-blue-200 p-3 rounded flex-1 flex items-center transition-all duration-700 ${
+                    isOptimizedContentShowing ? 'transform hover:scale-105 hover:shadow-md' : ''
+                  }`}
+                  style={{
+                    animationDelay: isOptimizedContentShowing ? `${index * 200}ms` : '0ms'
+                  }}
+                >
                   <div className="text-base font-bold text-blue-800 text-center w-full leading-tight">{factor.title}</div>
                 </div>
               ))}
@@ -391,12 +426,24 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
             <h3 className="text-xl font-semibold text-gray-700 mb-3 text-center">背景</h3>
             <div className="flex flex-col space-y-2 flex-1 overflow-hidden">
               {currentContent.factors.map((factor, index) => (
-                <div key={`bg-${index}`} className="text-sm text-gray-600 leading-tight border-b border-gray-200 pb-2 flex-1 flex items-start relative overflow-hidden">
+                <div 
+                  key={`bg-${index}`} 
+                  className={`text-sm text-gray-600 leading-tight border-b border-gray-200 pb-2 flex-1 flex items-start relative overflow-hidden transition-all duration-700 ${
+                    isOptimizedContentShowing ? 'hover:bg-gray-50 hover:shadow-sm' : ''
+                  }`}
+                  style={{
+                    animationDelay: isOptimizedContentShowing ? `${(index + 4) * 200}ms` : '0ms'
+                  }}
+                >
                   {isCoding && index === 1 ? 
                     <div className="w-full h-full min-h-[80px] max-h-[120px]">
                       {renderTerminalPlaceholder('main')}
                     </div> : 
-                    <div className="w-full h-full flex items-start">{factor.background}</div>
+                    <div className={`w-full h-full flex items-start transition-colors duration-1000 ${
+                      isTextGlowing && index === 1 ? 'text-cyan-400 font-semibold' : ''
+                    }`}>
+                      {factor.background}
+                    </div>
                   }
                 </div>
               ))}
@@ -408,18 +455,32 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
             <h3 className="text-xl font-semibold text-gray-700 mb-3 text-center">導入促進の方向性</h3>
             <div className="flex flex-col space-y-2 flex-1 overflow-hidden">
               {currentContent.factors.map((factor, index) => (
-                <div key={`sol-${factor.id}`} className="flex-1 overflow-hidden">
+                <div 
+                  key={`sol-${factor.id}`} 
+                  className="flex-1 overflow-hidden transition-all duration-700"
+                  style={{
+                    animationDelay: isOptimizedContentShowing ? `${(index + 8) * 200}ms` : '0ms'
+                  }}
+                >
                   {isCoding && index === 2 ? 
                     <div className="w-full h-full min-h-[80px] max-h-[120px] p-1">
                       {renderTerminalPlaceholder('solution')}
                     </div> : 
-                    <div className={`p-3 rounded h-full flex flex-col ${
-                      factor.isHighPriority 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-blue-100 text-blue-800 border border-blue-200'
+                    <div className={`p-3 rounded h-full flex flex-col transition-all duration-500 ${
+                      isTextGlowing && index === 2 
+                        ? 'bg-blue-600 text-white border border-blue-600' 
+                        : 'bg-gray-100 text-gray-700 border border-gray-300'
+                    } ${
+                      isOptimizedContentShowing 
+                        ? (isTextGlowing && index === 2 
+                            ? 'hover:bg-blue-700 hover:scale-105 hover:shadow-lg' 
+                            : 'hover:bg-gray-200 hover:scale-105 hover:shadow-md')
+                        : ''
                     }`}>
-                      <div className="text-sm font-bold mb-1 leading-tight">{factor.solution}</div>
-                      <div className="text-xs leading-snug whitespace-pre-line flex-1">
+                      <div className="text-sm font-bold mb-1 leading-tight transition-colors duration-1000">
+                        {factor.solution}
+                      </div>
+                      <div className="text-xs leading-snug whitespace-pre-line flex-1 transition-colors duration-1000">
                         {factor.solutionDetails}
                       </div>
                     </div>
@@ -430,8 +491,10 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
           </div>
         </div>
 
-        {/* 凡例 - スライド最下部に配置 */}
-        <div className="px-8 py-4 border-t border-gray-200 mt-auto">
+        {/* 凡例 - スライド最下部に配置 - フェードイン効果付き */}
+        <div className={`px-8 py-4 border-t border-gray-200 mt-auto transition-all duration-1000 ${
+          isOptimizedContentShowing ? 'opacity-100' : 'opacity-100'
+        }`}>
           <div className="flex justify-center space-x-8">
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-blue-600 rounded"></div>
