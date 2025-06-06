@@ -17,31 +17,31 @@ const manufacturingProposalContent = {
   factors: [
     {
       id: 'productivity',
-      title: '生産性向上の即効性',
-      background: '既存設備のIoT化により、停止時間を40%削減。リアルタイム監視で不良品率を15%改善し、即座に収益インパクトを創出',
-      solution: '設備稼働率向上プログラム',
-      solutionDetails: '• 3ヶ月でIoTセンサー導入\n• 予知保全システム構築\n• 生産計画最適化AI実装'
+      title: '生産性向上への取り組み状況',
+      background: '現状の生産性向上施策の効果測定方法と結果、業界平均対比での生産性水準の評価、生産性向上における主要阻害要因の特定',
+      solution: 'CIoTセンサー導入による予知保全システム構築',
+      solutionDetails: 'センサーデータによるリアルタイム監視\nAI予測による最適保全タイミング算出\n生産計画最適化による稼働率15%向上'
     },
     {
       id: 'cost',
-      title: 'コスト構造の抜本改革',
-      background: '在庫コスト30%削減、エネルギー効率25%向上により、年間1億円のコスト削減を実現。競合他社との価格競争力を確保',
+      title: 'コスト構造の最適化課題',
+      background: 'デジタル化の遅れによる競争力低下：既存設備のIoT化が進まず、リアルタイムでの生産監視・分析ができていないため、最適化の機会を逃している可能性があります。',
       solution: 'スマートファクトリー化',
-      solutionDetails: '• 在庫最適化システム導入\n• エネルギー管理AI活用\n• 無駄取りプロセス自動化'
+      solutionDetails: 'AI需要予測による在庫最適化システム導入\n過去データに基づいたエネルギー管理AI活用\n統合管理システムによる全工程可視化'
     },
     {
       id: 'quality',
-      title: '品質革新による差別化',
-      background: 'AI品質検査により不良率を90%削減。顧客満足度向上とクレーム対応コスト削減で、ブランド価値を大幅向上',
+      title: '品質管理の高度化ニーズ',
+      background: '品質管理の属人化リスク：熟練技術者の経験や勘に頼った品質管理が行われており、標準化・自動化が進んでいないことで、品質の安定性に課題がある可能性があります。',
       solution: 'AI品質管理システム',
-      solutionDetails: '• 画像認識による全数検査\n• 品質予測分析導入\n• トレーサビリティ強化'
+      solutionDetails: '画像認識技術による全数検査自動化\nリアルタイム品質予測分析\nトレーサビリティ強化'
     },
     {
       id: 'agility',
-      title: '市場変化への対応力強化',
-      background: '需要予測精度80%向上により、機会損失を最小化。多品種少量生産への柔軟対応で新市場開拓が可能',
+      title: '市場変化への対応力',
+      background: '予測精度の低さによる機会損失：需要予測や生産計画の精度が低く、過剰在庫や機会損失が発生している可能性があります。',
       solution: 'アジャイル生産体制構築',
-      solutionDetails: '• 需要予測AI導入\n• 生産ライン柔軟化\n• サプライチェーン最適化',
+      solutionDetails: '生産ライン柔軟化\nサプライチェーン最適化\n新市場開拓支援',
       isHighPriority: true
     }
   ]
@@ -333,37 +333,17 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
             <div 
               className="absolute w-full transition-all duration-[5000ms] ease-out"
               style={{
-                height: '10px',
-                background: 'linear-gradient(90deg, transparent 0%, rgba(255, 0, 0, 0.2) 10%, rgba(255, 0, 0, 0.6) 30%, rgba(255, 0, 0, 1) 50%, rgba(255, 0, 0, 0.6) 70%, rgba(255, 0, 0, 0.2) 90%, transparent 100%)',
-                boxShadow: '0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.5), 0 0 60px rgba(255, 0, 0, 0.3)',
+                height: '2px',
+                backgroundColor: 'rgba(0, 255, 255, 1)',
                 top: `${radarPosition}%`,
                 left: 0,
                 right: 0
               }}
-            >
-              {/* グロー効果上層 */}
-              <div 
-                className="absolute w-full -top-3"
-                style={{
-                  height: '16px',
-                  background: 'linear-gradient(90deg, transparent 0%, rgba(255, 0, 0, 0.1) 20%, rgba(255, 0, 0, 0.4) 40%, rgba(255, 0, 0, 0.6) 50%, rgba(255, 0, 0, 0.4) 60%, rgba(255, 0, 0, 0.1) 80%, transparent 100%)',
-                  filter: 'blur(5px)'
-                }}
-              />
-              {/* グロー効果下層 */}
-              <div 
-                className="absolute w-full -top-5"
-                style={{
-                  height: '20px',
-                  background: 'linear-gradient(90deg, transparent 0%, rgba(255, 0, 0, 0.05) 30%, rgba(255, 0, 0, 0.2) 45%, rgba(255, 0, 0, 0.3) 50%, rgba(255, 0, 0, 0.2) 55%, rgba(255, 0, 0, 0.05) 70%, transparent 100%)',
-                  filter: 'blur(10px)'
-                }}
-              />
-            </div>
+            />
           </div>
           
           {/* レーダースキャン中のインジケーター */}
-          <div className="absolute top-4 right-4 z-[110] bg-red-500 text-white px-3 py-1 rounded-full text-sm animate-pulse shadow-lg">
+          <div className="absolute top-4 right-4 z-[110] bg-cyan-500 text-white px-3 py-1 rounded-full text-sm animate-pulse shadow-lg">
             🔍 AI深層分析中... (位置: {radarPosition.toFixed(0)}%)
           </div>
         </>
@@ -395,15 +375,15 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
         {/* サブタイトル */}
         <div className="px-8 py-4">
           <p className="text-xl text-gray-700 text-center font-semibold">
-            ソフトバンクと実現する<span className="text-blue-600">AI-Readyな製造業DX実装</span>による競争力強化戦略
+            製造業の競争環境が激化する中、<span className="text-blue-600">生成AIを活用したデジタル変革</span>は「選択肢」から「必須要件」へと変化しています。
           </p>
         </div>
 
         {/* メインコンテンツ - 3列レイアウト - フェードイン効果付き */}
         <div className="px-8 py-4 grid grid-cols-3 gap-6 flex-1 overflow-hidden">
-          {/* 左側：導入阻害要因 */}
+          {/* 左側：As-Is */}
           <div className="flex flex-col h-full">
-            <h3 className="text-xl font-semibold text-gray-700 mb-3 text-center">導入阻害要因</h3>
+            <h3 className="text-xl font-semibold text-gray-700 mb-3 text-center">As-Is</h3>
             <div className="flex flex-col space-y-2 flex-1 overflow-hidden">
               {currentContent.factors.map((factor, index) => (
                 <div 
@@ -421,9 +401,9 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
             </div>
           </div>
 
-          {/* 中央：背景 - コーディングアニメーション対象 */}
+          {/* 中央：仮説課題(GAP) - コーディングアニメーション対象 */}
           <div className="flex flex-col h-full">
-            <h3 className="text-xl font-semibold text-gray-700 mb-3 text-center">背景</h3>
+            <h3 className="text-xl font-semibold text-gray-700 mb-3 text-center">仮説課題(GAP)</h3>
             <div className="flex flex-col space-y-2 flex-1 overflow-hidden">
               {currentContent.factors.map((factor, index) => (
                 <div 
@@ -450,9 +430,9 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
             </div>
           </div>
 
-          {/* 右側：導入促進の方向性 */}
+          {/* 右側：To-Be */}
           <div className="flex flex-col h-full">
-            <h3 className="text-xl font-semibold text-gray-700 mb-3 text-center">導入促進の方向性</h3>
+            <h3 className="text-xl font-semibold text-gray-700 mb-3 text-center">To-Be</h3>
             <div className="flex flex-col space-y-2 flex-1 overflow-hidden">
               {currentContent.factors.map((factor, index) => (
                 <div 
