@@ -334,8 +334,8 @@ export default function FaceAnalyzer({ onFaceDetected }: FaceAnalyzerProps) {
         setCurrentEmotion(maxExpression);
         setAllEmotions(emotionsData);
         
-        // 顔の右側に感情データを表示
-        const dataStartX = box.x + box.width + 20;
+        // 顔の左側に感情データを表示
+        const dataStartX = Math.max(10, box.x - 260); // 左側に配置、画面外に出ないよう調整
         const dataStartY = box.y;
         
         // データボックスの背景
@@ -636,10 +636,29 @@ export default function FaceAnalyzer({ onFaceDetected }: FaceAnalyzerProps) {
           </div>
         </div>
         
+        {/* Cristalボタン - ビデオ枠の右端下部に配置 */}
+        <div className="absolute bottom-3 right-0 z-50">
+          {/* 光るリングアニメーション */}
+          <div className="absolute inset-0 rounded-full bg-cyan-400/10 animate-pulse" style={{ width: '13rem', height: '13rem', margin: '-0.5rem' }}></div>
+          <div className="absolute inset-0 rounded-full bg-cyan-500/15 animate-pulse" style={{ width: '12.5rem', height: '12.5rem', margin: '-0.25rem', animationDelay: '0.5s' }}></div>
+          <div className="absolute inset-0 rounded-full bg-cyan-500/20 animate-pulse" style={{ width: '12rem', height: '12rem', margin: '-0.1rem', animationDelay: '1s' }}></div>
+          
+          <button 
+            onClick={() => {
+              // page.tsxのhandleCristalClick関数を呼び出すため、カスタムイベントを発火
+              const event = new CustomEvent('cristalClick');
+              window.dispatchEvent(event);
+            }}
+            className="w-48 h-48 rounded-full overflow-hidden transition-all duration-300 transform hover:scale-105 focus:outline-none shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 relative z-10"
+          >
+            <img src="/CRISTAL.png" alt="CRISTAL" className="w-full h-full object-cover pointer-events-none" />
+          </button>
+        </div>
+
         {/* コントロールボタン */}
         <button 
           onClick={toggleControls}
-          className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md text-cyan-400 rounded-full p-2 hover:bg-black/80 transition-all z-10 border border-cyan-500/30"
+          className="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-cyan-400 rounded-full p-2 hover:bg-black/80 transition-all z-10 border border-cyan-500/30"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
@@ -647,7 +666,7 @@ export default function FaceAnalyzer({ onFaceDetected }: FaceAnalyzerProps) {
         </button>
         
         {showControls && (
-          <div className="absolute bottom-12 right-3 bg-black/70 backdrop-blur-md text-cyan-400 rounded-lg p-3 z-10 border border-cyan-500/30">
+          <div className="absolute top-12 right-3 bg-black/70 backdrop-blur-md text-cyan-400 rounded-lg p-3 z-10 border border-cyan-500/30">
             <h3 className="text-xs font-bold mb-2 text-center border-b border-cyan-500/30 pb-1">SYSTEM CONTROLS</h3>
             <div className="flex flex-col gap-2">
               <button 

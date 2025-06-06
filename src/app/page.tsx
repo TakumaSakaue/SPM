@@ -64,6 +64,7 @@ export default function Home() {
   const transferAnimationFrameRef = useRef<number | null>(null)
   const [analysisStartTime, setAnalysisStartTime] = useState<number>(0)
   const [isSlideOptimizing, setIsSlideOptimizing] = useState<boolean>(false)
+  const [isConsultingSlideOpen, setIsConsultingSlideOpen] = useState<boolean>(false)
 
   // メッセージフィールドの状態管理
   const [messageText, setMessageText] = useState<string>('')
@@ -226,18 +227,31 @@ export default function Home() {
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        closeModal()
+        if (isConsultingSlideOpen) {
+          setIsConsultingSlideOpen(false)
+        } else if (isModalOpen) {
+          closeModal()
+        }
       }
     }
+
+    // Cristalボタンのカスタムイベントリスナー
+    const handleCristalEvent = () => {
+      handleCristalClick()
+    }
     
-    if (isModalOpen) {
+    if (isModalOpen || isConsultingSlideOpen) {
       document.addEventListener('keydown', handleEsc)
     }
+
+    // Cristalカスタムイベントリスナーを追加
+    window.addEventListener('cristalClick', handleCristalEvent)
     
     return () => {
       document.removeEventListener('keydown', handleEsc)
+      window.removeEventListener('cristalClick', handleCristalEvent)
     }
-  }, [isModalOpen])
+  }, [isModalOpen, isConsultingSlideOpen])
 
   // データ転送アニメーションを開始
   const startDataTransfer = () => {
@@ -629,6 +643,14 @@ export default function Home() {
     setCristalAnalysisText('')
   }
 
+  // 推奨アクション実行処理
+  const handleActionExecute = (actionTitle: string) => {
+    if (actionTitle === '顧客課題の深掘り') {
+      setIsConsultingSlideOpen(true)
+    }
+    // 他のアクションの処理もここに追加可能
+  }
+
   // CRISTAL ホログラフィック・プロジェクション アニメーション
   useEffect(() => {
     if (cristalInputState !== 'loading' || !cristalLoadingCanvasRef.current) return
@@ -658,33 +680,35 @@ export default function Home() {
       size: number, opacity: number, hue: number
     }> = []
     
-    // ホログラム・パーティクル初期化
-    for (let i = 0; i < 150; i++) {
-      hologramParticles.push({
-        x: centerX + (Math.random() - 0.5) * 200,
-        y: centerY + (Math.random() - 0.5) * 200,
-        z: Math.random() * 100,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        vz: (Math.random() - 0.5) * 0.3,
-        size: Math.random() * 2 + 0.5,
-        opacity: Math.random() * 0.8 + 0.2,
-        hue: 200 + Math.random() * 80, // 青紫系
-        spiralAngle: Math.random() * Math.PI * 2
-      })
-    }
+           // ホログラム・パーティクル初期化（長方形エリアに配置）
+       const particleAreaWidth = canvas.width * 0.8
+       const particleAreaHeight = canvas.height * 0.6
+       for (let i = 0; i < 120; i++) {
+         hologramParticles.push({
+           x: centerX + (Math.random() - 0.5) * particleAreaWidth,
+           y: centerY + (Math.random() - 0.5) * particleAreaHeight,
+           z: Math.random() * 100,
+           vx: (Math.random() - 0.5) * 0.5,
+           vy: (Math.random() - 0.5) * 0.5,
+           vz: (Math.random() - 0.5) * 0.3,
+           size: Math.random() * 2 + 0.5,
+           opacity: Math.random() * 0.8 + 0.2,
+           hue: 200 + Math.random() * 80, // 青紫系
+           spiralAngle: Math.random() * Math.PI * 2
+         })
+       }
     
-    // データストリーム初期化
-    for (let i = 0; i < 32; i++) {
-      dataStreams.push({
-        angle: (i / 32) * Math.PI * 2,
-        radius: 60 + Math.random() * 40,
-        speed: 0.02 + Math.random() * 0.03,
-        size: Math.random() * 3 + 1,
-        opacity: Math.random() * 0.6 + 0.4,
-        hue: 180 + Math.random() * 100
-      })
-    }
+           // データストリーム初期化（楕円軌道で長方形に最適化）
+       for (let i = 0; i < 28; i++) {
+         dataStreams.push({
+           angle: (i / 28) * Math.PI * 2,
+           radius: Math.min(canvas.width, canvas.height) * 0.25 + Math.random() * 20,
+           speed: 0.02 + Math.random() * 0.03,
+           size: Math.random() * 3 + 1,
+           opacity: Math.random() * 0.6 + 0.4,
+           hue: 180 + Math.random() * 100
+         })
+       }
     
     const animate = () => {
       if (cristalInputState !== 'loading') return
@@ -695,15 +719,15 @@ export default function Home() {
       
       animationTime += 0.016
       
-      // ホログラフィック・スキャンライン
-      const scanLineY = centerY + Math.sin(animationTime * 2) * 80
-      const scanGradient = ctx.createLinearGradient(0, scanLineY - 20, 0, scanLineY + 20)
-      scanGradient.addColorStop(0, 'rgba(0, 200, 255, 0)')
-      scanGradient.addColorStop(0.5, `rgba(0, 200, 255, ${Math.sin(animationTime * 3) * 0.3 + 0.6})`)
-      scanGradient.addColorStop(1, 'rgba(0, 200, 255, 0)')
-      
-      ctx.fillStyle = scanGradient
-      ctx.fillRect(0, scanLineY - 20, canvas.width, 40)
+               // ホログラフィック・スキャンライン（長方形全体をカバー）
+         const scanLineY = centerY + Math.sin(animationTime * 2) * (canvas.height * 0.3)
+         const scanGradient = ctx.createLinearGradient(0, scanLineY - 15, 0, scanLineY + 15)
+         scanGradient.addColorStop(0, 'rgba(0, 200, 255, 0)')
+         scanGradient.addColorStop(0.5, `rgba(0, 200, 255, ${Math.sin(animationTime * 3) * 0.3 + 0.6})`)
+         scanGradient.addColorStop(1, 'rgba(0, 200, 255, 0)')
+         
+         ctx.fillStyle = scanGradient
+         ctx.fillRect(0, scanLineY - 15, canvas.width, 30)
       
       // グリッチ効果のための背景ノイズ
       for (let i = 0; i < 20; i++) {
@@ -761,23 +785,23 @@ export default function Home() {
         particle.y += particle.vy + Math.sin(particle.spiralAngle) * 0.5
         particle.z += particle.vz
         
-        // 境界チェック・リセット
-        if (particle.x < -50 || particle.x > canvas.width + 50 || 
-            particle.y < -50 || particle.y > canvas.height + 50 ||
-            particle.z < 0 || particle.z > 100) {
-          particle.x = centerX + (Math.random() - 0.5) * 200
-          particle.y = centerY + (Math.random() - 0.5) * 200
-          particle.z = Math.random() * 100
-        }
+                   // 境界チェック・リセット（長方形エリア）
+           if (particle.x < -30 || particle.x > canvas.width + 30 || 
+               particle.y < -30 || particle.y > canvas.height + 30 ||
+               particle.z < 0 || particle.z > 100) {
+             particle.x = centerX + (Math.random() - 0.5) * particleAreaWidth
+             particle.y = centerY + (Math.random() - 0.5) * particleAreaHeight
+             particle.z = Math.random() * 100
+           }
         
         // ホログラフィック・レンダリング
         const depth = (particle.z / 100)
         const finalSize = particle.size * (0.5 + depth * 0.5)
         const finalOpacity = particle.opacity * (0.3 + depth * 0.7) * Math.sin(animationTime * 2 + index * 0.1) * 0.5 + 0.5
         
-        // スキャンライン干渉効果
-        const scanDistortion = Math.abs(particle.y - scanLineY) < 40 ? 
-          Math.sin(animationTime * 15) * 0.3 + 0.7 : 1
+                   // スキャンライン干渉効果（長方形に最適化）
+           const scanDistortion = Math.abs(particle.y - scanLineY) < 25 ? 
+             Math.sin(animationTime * 15) * 0.3 + 0.7 : 1
         
         ctx.save()
         ctx.globalAlpha = finalOpacity * scanDistortion
@@ -799,13 +823,16 @@ export default function Home() {
         ctx.restore()
       })
       
-      // データストリーム螺旋
-      dataStreams.forEach((stream, index) => {
-        stream.angle += stream.speed
-        
-        const x = centerX + Math.cos(stream.angle) * stream.radius
-        const y = centerY + Math.sin(stream.angle) * stream.radius
-        const depth = Math.sin(stream.angle * 2) * 0.5 + 0.5
+               // データストリーム螺旋（楕円軌道で長方形に最適化）
+         dataStreams.forEach((stream, index) => {
+           stream.angle += stream.speed
+           
+           // 楕円軌道で長方形エリアに最適化
+           const radiusX = canvas.width * 0.35
+           const radiusY = canvas.height * 0.25
+           const x = centerX + Math.cos(stream.angle) * radiusX
+           const y = centerY + Math.sin(stream.angle) * radiusY
+           const depth = Math.sin(stream.angle * 2) * 0.5 + 0.5
         
         ctx.save()
         ctx.globalAlpha = stream.opacity * depth
@@ -1020,12 +1047,12 @@ export default function Home() {
 
                 {cristalInputState === 'loading' && (
                   <div className="space-y-4">
-                    {/* ローディングアニメーション */}
-                    <div className="bg-black/30 rounded-lg p-6 border border-purple-500/10 flex flex-col items-center justify-center">
-                      <div className="relative w-48 h-48">
+                    {/* ホログラフィック・プロジェクション・ウィンドウ */}
+                    <div className="bg-black/30 rounded-lg p-4 border border-cyan-500/20 flex flex-col items-center justify-center">
+                      <div className="relative w-full h-40">
                         <canvas 
                           ref={cristalLoadingCanvasRef}
-                          className="w-full h-full rounded-lg"
+                          className="w-full h-full rounded-lg border border-cyan-400/30"
                         />
                       </div>
                     </div>
@@ -1131,11 +1158,14 @@ export default function Home() {
                             <p className="text-gray-300 text-xs leading-relaxed mb-3">
                               {action.reason}
                             </p>
-                            <button className={`w-full py-1.5 rounded text-xs font-medium transition-all ${
-                              index === 0 ? 'bg-purple-500/80 hover:bg-purple-500 text-white' :
-                              index === 1 ? 'bg-pink-500/80 hover:bg-pink-500 text-white' :
-                              'bg-indigo-500/80 hover:bg-indigo-500 text-white'
-                            }`}>
+                            <button 
+                              onClick={() => handleActionExecute(action.title)}
+                              className={`w-full py-1.5 rounded text-xs font-medium transition-all ${
+                                index === 0 ? 'bg-purple-500/80 hover:bg-purple-500 text-white' :
+                                index === 1 ? 'bg-pink-500/80 hover:bg-pink-500 text-white' :
+                                'bg-indigo-500/80 hover:bg-indigo-500 text-white'
+                              }`}
+                            >
                               実行
                             </button>
                           </div>
@@ -1190,22 +1220,6 @@ export default function Home() {
             <div className="pb-2">
               <FaceAnalyzer onFaceDetected={handleFaceDetection} />
             </div>
-          </div>
-
-          {/* クリスタル円形ボタン */}
-          <div className="fixed bottom-8 right-8 z-50">
-            {/* 光るリングアニメーション */}
-            <div className="absolute inset-0 rounded-full bg-cyan-400/10 animate-pulse" style={{ width: '13rem', height: '13rem', margin: '-0.5rem' }}></div>
-            <div className="absolute inset-0 rounded-full bg-cyan-500/15 animate-pulse" style={{ width: '12.5rem', height: '12.5rem', margin: '-0.25rem', animationDelay: '0.5s' }}></div>
-            <div className="absolute inset-0 rounded-full bg-cyan-500/20 animate-pulse" style={{ width: '12rem', height: '12rem', margin: '-0.1rem', animationDelay: '1s' }}></div>
-            
-            <button 
-              ref={cristalButtonRef}
-              onClick={handleCristalClick}
-              className="w-48 h-48 rounded-full overflow-hidden transition-all duration-300 transform hover:scale-105 focus:outline-none shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 relative z-10"
-            >
-              <img src="/CRISTAL.png" alt="CRISTAL" className="w-full h-full object-cover pointer-events-none" />
-            </button>
           </div>
 
 
@@ -1386,6 +1400,41 @@ export default function Home() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* コンサルティングスライドモーダル */}
+      {isConsultingSlideOpen && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[101] p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsConsultingSlideOpen(false)
+            }
+          }}
+        >
+          <div className="bg-white rounded-xl w-[90vw] max-w-[1200px] overflow-hidden shadow-2xl border border-gray-300 relative" style={{ aspectRatio: '16/9' }}>
+            {/* 閉じるボタン */}
+            <button 
+              onClick={() => setIsConsultingSlideOpen(false)}
+              className="absolute top-4 right-4 z-10 text-gray-600 hover:text-gray-800 transition-colors bg-white/80 backdrop-blur-sm rounded-full p-2 shadow-md"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
+            {/* ConsultingSlideコンポーネント */}
+            <ConsultingSlide 
+              isVisible={true} 
+              currentEmotion={currentEmotion}
+              onComplete={() => {
+                setTimeout(() => {
+                  setIsConsultingSlideOpen(false)
+                }, 2000)
+              }}
+            />
           </div>
         </div>
       )}
