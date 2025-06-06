@@ -104,6 +104,8 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
   const [showOptimized, setShowOptimized] = useState(false);
   const [codingComplete, setCodingComplete] = useState(false);
   const [isOptimizedContentShowing, setIsOptimizedContentShowing] = useState(false);
+  const [isRadarScanning, setIsRadarScanning] = useState(false);
+  const [radarPosition, setRadarPosition] = useState(-10);
 
   const [currentContent, setCurrentContent] = useState(manufacturingProposalContent);
   const codeLines = getCodeSnippets(currentEmotion);
@@ -127,13 +129,15 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
         setCodingComplete(false);
         setShowOptimized(false);
         setIsOptimizedContentShowing(false);
+        setIsRadarScanning(false);
+        setRadarPosition(-10);
       
       setIsAnimating(true);
       const timer1 = setTimeout(() => {
         setIsAnimating(false);
-        // 1秒後にコーディングアニメーション開始
+        // 1秒後にレーダースキャン開始
         const timer2 = setTimeout(() => {
-          startTerminalCoding();
+          startRadarScan();
         }, 1000);
         timeoutRefs.current.push(timer2);
       }, 300);
@@ -144,6 +148,28 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
       clearAllTimers();
     };
   }, [isVisible]);
+
+  const startRadarScan = () => {
+    console.log('レーダースキャン開始 (シンプル版)'); // デバッグ用
+    setIsRadarScanning(true);
+    setRadarPosition(-10);
+    
+    // ゆっくりとしたシンプルスキャン（5秒）
+    const animationTimer = setTimeout(() => {
+      console.log('レーダー位置を100%に移動開始'); // デバッグ用
+      setRadarPosition(105);
+    }, 100);
+    timeoutRefs.current.push(animationTimer);
+    
+    // 5秒でレーダースキャン完了後、コーディングアニメーション開始
+    const completeTimer = setTimeout(() => {
+      setIsRadarScanning(false);
+      setRadarPosition(-10);
+      console.log('レーダースキャン完了、コーディングアニメーション開始'); // デバッグ用
+      startTerminalCoding();
+    }, 5200);
+    timeoutRefs.current.push(completeTimer);
+  };
 
   const startTerminalCoding = () => {
     setIsCoding(true);
@@ -270,7 +296,54 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
   };
 
   return (
-    <div className={`w-full h-full bg-white ${isAnimating ? 'opacity-50' : 'opacity-100'} transition-all duration-300 relative flex flex-col`}>
+    <>
+      
+      <div className={`w-full h-full bg-white ${isAnimating ? 'opacity-50' : 'opacity-100'} transition-all duration-300 relative flex flex-col`}>
+      {/* レーダースキャンアニメーション */}
+      {isRadarScanning && (
+        <>
+          {/* レーダースキャンライン（シンプル版） */}
+          <div className="fixed inset-0 z-[100] overflow-hidden pointer-events-none">
+            {/* メインレーダーライン */}
+            <div 
+              className="absolute w-full transition-all duration-[5000ms] ease-out"
+              style={{
+                height: '10px',
+                background: 'linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.2) 10%, rgba(0, 255, 255, 0.6) 30%, rgba(0, 255, 255, 1) 50%, rgba(0, 255, 255, 0.6) 70%, rgba(0, 255, 255, 0.2) 90%, transparent 100%)',
+                boxShadow: '0 0 20px rgba(0, 255, 255, 0.8), 0 0 40px rgba(0, 255, 255, 0.5), 0 0 60px rgba(0, 255, 255, 0.3)',
+                top: `${radarPosition}%`,
+                left: 0,
+                right: 0
+              }}
+            >
+              {/* グロー効果上層 */}
+              <div 
+                className="absolute w-full -top-3"
+                style={{
+                  height: '16px',
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.1) 20%, rgba(0, 255, 255, 0.4) 40%, rgba(0, 255, 255, 0.6) 50%, rgba(0, 255, 255, 0.4) 60%, rgba(0, 255, 255, 0.1) 80%, transparent 100%)',
+                  filter: 'blur(5px)'
+                }}
+              />
+              {/* グロー効果下層 */}
+              <div 
+                className="absolute w-full -top-5"
+                style={{
+                  height: '20px',
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.05) 30%, rgba(0, 255, 255, 0.2) 45%, rgba(0, 255, 255, 0.3) 50%, rgba(0, 255, 255, 0.2) 55%, rgba(0, 255, 255, 0.05) 70%, transparent 100%)',
+                  filter: 'blur(10px)'
+                }}
+              />
+            </div>
+          </div>
+          
+          {/* レーダースキャン中のインジケーター */}
+          <div className="absolute top-4 right-4 z-[110] bg-cyan-500 text-white px-3 py-1 rounded-full text-sm animate-pulse shadow-lg">
+            🔍 AI深層分析中... (位置: {radarPosition.toFixed(0)}%)
+          </div>
+        </>
+      )}
+
       {/* 最適化されたコンテンツ表示中のインジケーター */}
       {isOptimizedContentShowing && (
         <div className="absolute top-4 right-4 z-10 bg-green-500 text-white px-3 py-1 rounded-full text-sm animate-pulse">
@@ -376,6 +449,7 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
         </div>
       </div>
     </div>
+    </>
   );
 };
 
