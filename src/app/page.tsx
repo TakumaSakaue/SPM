@@ -65,6 +65,7 @@ export default function Home() {
   const [analysisStartTime, setAnalysisStartTime] = useState<number>(0)
   const [isSlideOptimizing, setIsSlideOptimizing] = useState<boolean>(false)
   const [isConsultingSlideOpen, setIsConsultingSlideOpen] = useState<boolean>(false)
+  const [isFaceAnalysisActive, setIsFaceAnalysisActive] = useState<boolean>(false)
 
   // メッセージフィールドの状態管理
   const [messageText, setMessageText] = useState<string>('')
@@ -185,7 +186,13 @@ export default function Home() {
     }
   }, [isAnalyzing])
   
-  // 球体アニメーションのコントロール
+  // 表情分析・音声分析の状態を切り替える
+  const handleAnalysisToggle = (isActive: boolean) => {
+    setIsFaceAnalysisActive(isActive)
+    console.log(`分析状態が変更されました: ${isActive ? 'ON' : 'OFF'}`)
+  }
+
+  // 球体アニメーションのコントロール（古い機能は残しておく）
   const handleCristalClick = () => {
     setIsModalOpen(true)
     // 分析完了画面を表示（プランニング実行ボタンが表示される）
@@ -234,22 +241,13 @@ export default function Home() {
         }
       }
     }
-
-    // Cristalボタンのカスタムイベントリスナー
-    const handleCristalEvent = () => {
-      handleCristalClick()
-    }
     
     if (isModalOpen || isConsultingSlideOpen) {
       document.addEventListener('keydown', handleEsc)
     }
-
-    // Cristalカスタムイベントリスナーを追加
-    window.addEventListener('cristalClick', handleCristalEvent)
     
     return () => {
       document.removeEventListener('keydown', handleEsc)
-      window.removeEventListener('cristalClick', handleCristalEvent)
     }
   }, [isModalOpen, isConsultingSlideOpen])
 
@@ -579,15 +577,11 @@ export default function Home() {
   const mockRecommendedActions = [
     {
       title: "提案商材をTASUKIアノテーションに変更",
-      reason: "顧客の表情分析から技術的な詳細への関心が低く、視覚的な説明資料により理解促進と関心向上が期待できるため、アノテーション形式への変更を推奨します。"
-    },
-    {
-      title: "顧客課題の深掘り",
-      reason: "微細な表情変化から潜在的な不安や懸念が検出されました。現在の提案では解決しきれていない課題が存在する可能性が高いため、追加のヒアリングが効果的です。"
+      reason: "ミーティング冒頭でお客様は、ミッションクリティカルな製造業におけるハルシネーションに懸念を示されました。RAG精度向上のため、アノテーションサービスへの変更を検討しましょう。"
     },
     {
       title: "資料のリアルタイムアップデート",
-      reason: "音声分析と視線追跡から、ROI部分への強い関心が確認されました。財務効果を前面に押し出した資料構成に変更することで成約確度の向上が見込めます。"
+      reason: "微細な表情変化から論点の行き違いが検出されました。現在の提案では解決しきれていない課題が存在する可能性が高いため、追加のヒアリングが効果的です。"
     }
   ]
 
@@ -645,7 +639,7 @@ export default function Home() {
 
   // 推奨アクション実行処理
   const handleActionExecute = (actionTitle: string) => {
-    if (actionTitle === '顧客課題の深掘り') {
+    if (actionTitle === '資料のリアルタイムアップデート') {
       setIsConsultingSlideOpen(true)
     }
     // 他のアクションの処理もここに追加可能
@@ -1218,7 +1212,11 @@ export default function Home() {
           
           <div className="container mx-auto p-4 max-w-full">
             <div className="pb-2">
-              <FaceAnalyzer onFaceDetected={handleFaceDetection} />
+              <FaceAnalyzer 
+                onFaceDetected={handleFaceDetection} 
+                isAnalysisActive={isFaceAnalysisActive}
+                onAnalysisToggle={handleAnalysisToggle}
+              />
             </div>
           </div>
 

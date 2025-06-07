@@ -15,6 +15,8 @@ interface FaceAnalyzerProps {
     face: { x: number; y: number; width: number; height: number } | null,
     emotion: Emotion
   ) => void;
+  isAnalysisActive?: boolean;
+  onAnalysisToggle?: (isActive: boolean) => void;
 }
 
 const emotionEmojis: Record<Emotion, string> = {
@@ -52,7 +54,7 @@ const emotionDescriptions: Record<Emotion, string> = {
 // モデルのCDN URL
 const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
 
-export default function FaceAnalyzer({ onFaceDetected }: FaceAnalyzerProps) {
+export default function FaceAnalyzer({ onFaceDetected, isAnalysisActive = false, onAnalysisToggle }: FaceAnalyzerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -65,11 +67,17 @@ export default function FaceAnalyzer({ onFaceDetected }: FaceAnalyzerProps) {
   const [isStreamStarted, setIsStreamStarted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showControls, setShowControls] = useState(false)
-  const [isDetecting, setIsDetecting] = useState(true)
+  const [isDetecting, setIsDetecting] = useState(false)
   const [modelSize, setModelSize] = useState<'tiny' | 'normal'>('tiny')
   const [detectedFace, setDetectedFace] = useState<faceapi.FaceDetection | null>(null)
   const [isListening, setIsListening] = useState(false)
   const [audioVisualization, setAudioVisualization] = useState<number[]>(Array(20).fill(0))
+
+  // 外部からの分析状態制御に同期
+  useEffect(() => {
+    setIsDetecting(isAnalysisActive)
+    setIsListening(isAnalysisActive)
+  }, [isAnalysisActive])
   
   // 音声のシミュレーション
   useEffect(() => {
@@ -413,8 +421,10 @@ export default function FaceAnalyzer({ onFaceDetected }: FaceAnalyzerProps) {
     const elapsed = endTime - startTime;
     setFps(Math.round(1000 / elapsed));
     
-    // 次のフレームで再実行
+    // 分析が有効で、かつストリームが開始されている場合のみ次のフレームで再実行
+    if (isDetecting && isStreamStarted) {
     requestAnimationFrame(detectFaces);
+    }
   }
   
   // モデルサイズを切り替える
@@ -424,10 +434,10 @@ export default function FaceAnalyzer({ onFaceDetected }: FaceAnalyzerProps) {
   
   // 顔検出の一時停止/再開を切り替える
   const toggleDetection = () => {
-    setIsDetecting(prev => !prev);
-    if (!isDetecting && isStreamStarted) {
-      // 検出を再開する場合
-      requestAnimationFrame(detectFaces);
+    const newState = !isDetecting;
+    setIsDetecting(newState);
+    if (onAnalysisToggle) {
+      onAnalysisToggle(newState);
     }
   }
   
@@ -454,21 +464,26 @@ export default function FaceAnalyzer({ onFaceDetected }: FaceAnalyzerProps) {
     }
   }, [isModelLoaded]);
   
-  // カメラストリームが開始されたら顔検出を開始
+  // カメラストリームが開始されたらキャンバスサイズを設定
   useEffect(() => {
     if (isStreamStarted && videoRef.current) {
-      console.log('カメラストリームが開始されたので顔検出を開始します');
+      console.log('カメラストリームが開始されました');
       
       // キャンバスのサイズをビデオに合わせる
       if (canvasRef.current && videoRef.current) {
         canvasRef.current.width = videoRef.current.clientWidth;
         canvasRef.current.height = videoRef.current.clientHeight;
       }
-      
-      setIsDetecting(true);
-      detectFaces();
     }
   }, [isStreamStarted]);
+
+  // 分析状態が変更されたときに検出ループを制御
+  useEffect(() => {
+    if (isDetecting && isStreamStarted && isModelLoaded) {
+      console.log('顔検出を開始します');
+      detectFaces();
+    }
+  }, [isDetecting, isStreamStarted, isModelLoaded]);
   
   // コンテナのサイズを調整
   useEffect(() => {
@@ -638,23 +653,35 @@ export default function FaceAnalyzer({ onFaceDetected }: FaceAnalyzerProps) {
         
         {/* Cristalボタン - ビデオ枠の右端下部に配置 */}
         <div className="absolute bottom-3 right-0 z-50">
-          {/* 光るリングアニメーション */}
-          <div className="absolute inset-0 rounded-full bg-cyan-400/10 animate-pulse" style={{ width: '13rem', height: '13rem', margin: '-0.5rem' }}></div>
-          <div className="absolute inset-0 rounded-full bg-cyan-500/15 animate-pulse" style={{ width: '12.5rem', height: '12.5rem', margin: '-0.25rem', animationDelay: '0.5s' }}></div>
-          <div className="absolute inset-0 rounded-full bg-cyan-500/20 animate-pulse" style={{ width: '12rem', height: '12rem', margin: '-0.1rem', animationDelay: '1s' }}></div>
+          {/* 光るリングアニメーション - 分析状態に応じて色を変更 */}
+          <div className={`absolute inset-0 rounded-full animate-pulse ${isAnalysisActive ? 'bg-green-400/20' : 'bg-cyan-400/10'}`} style={{ width: '13rem', height: '13rem', margin: '-0.5rem' }}></div>
+          <div className={`absolute inset-0 rounded-full animate-pulse ${isAnalysisActive ? 'bg-green-500/25' : 'bg-cyan-500/15'}`} style={{ width: '12.5rem', height: '12.5rem', margin: '-0.25rem', animationDelay: '0.5s' }}></div>
+          <div className={`absolute inset-0 rounded-full animate-pulse ${isAnalysisActive ? 'bg-green-500/30' : 'bg-cyan-500/20'}`} style={{ width: '12rem', height: '12rem', margin: '-0.1rem', animationDelay: '1s' }}></div>
           
           <button 
             onClick={() => {
-              // page.tsxのhandleCristalClick関数を呼び出すため、カスタムイベントを発火
-              const event = new CustomEvent('cristalClick');
-              window.dispatchEvent(event);
+              // 分析状態をトグルし、親コンポーネントに通知
+              const newState = !isAnalysisActive;
+              if (onAnalysisToggle) {
+                onAnalysisToggle(newState);
+              }
             }}
-            className="w-48 h-48 rounded-full overflow-hidden transition-all duration-300 transform hover:scale-105 focus:outline-none shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 relative z-10"
+            className={`w-48 h-48 rounded-full overflow-hidden transition-all duration-300 transform hover:scale-105 focus:outline-none relative z-10 ${
+              isAnalysisActive 
+                ? 'shadow-lg shadow-green-500/30 hover:shadow-green-500/50' 
+                : 'shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50'
+            }`}
+            title={isAnalysisActive ? '分析を停止' : '分析を開始'}
           >
             <img src="/CRISTAL.png" alt="CRISTAL" className="w-full h-full object-cover pointer-events-none" />
+            {isAnalysisActive && (
+              <div className="absolute inset-0 bg-green-500/20 rounded-full flex items-center justify-center">
+                <div className="text-white text-xs font-bold bg-green-600/80 px-2 py-1 rounded">ACTIVE</div>
+              </div>
+            )}
           </button>
         </div>
-
+        
         {/* コントロールボタン */}
         <button 
           onClick={toggleControls}

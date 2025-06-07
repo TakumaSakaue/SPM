@@ -127,10 +127,10 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
     if (isVisible) {
       // 初期化: 元のコンテンツに戻す
               clearAllTimers(); // 既存のタイマーをクリア
-        setCurrentContent(manufacturingProposalContent);
-        setIsCoding(false);
-        setCodingComplete(false);
-        setShowOptimized(false);
+      setCurrentContent(manufacturingProposalContent);
+      setIsCoding(false);
+      setCodingComplete(false);
+      setShowOptimized(false);
         setIsOptimizedContentShowing(false);
         setIsRadarScanning(false);
         setRadarPosition(-10);
@@ -201,11 +201,11 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
       setCodingComplete(true);
       
       // 最適化されたコンテンツに即座に変更
-      const optimizedContent = getOptimizedContent(currentEmotion);
-      setCurrentContent(optimizedContent);
-      setIsCoding(false);
-      setCodingComplete(false);
-      setShowOptimized(false);
+          const optimizedContent = getOptimizedContent(currentEmotion);
+          setCurrentContent(optimizedContent);
+          setIsCoding(false);
+          setCodingComplete(false);
+          setShowOptimized(false);
       setIsOptimizedContentShowing(true);
       
       // 最適化後のコンテンツが表示されてからテキスト色変化を開始
@@ -279,19 +279,19 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
               <div key={lineIndex} className="truncate">
                 <span className={`transition-colors duration-500 ${
                   isTextGlowing ? 'text-cyan-400' :
-                  line.trim().startsWith('#') ? 'text-gray-400' :
-                  line.includes('def ') ? 'text-yellow-400' :
-                  line.includes('=') ? 'text-green-400' :
-                  line.includes('"') ? 'text-red-400' :
-                  'text-white'
+                line.trim().startsWith('#') ? 'text-gray-400' :
+                line.includes('def ') ? 'text-yellow-400' :
+                line.includes('=') ? 'text-green-400' :
+                line.includes('"') ? 'text-red-400' :
+                'text-white'
                 }`}>
                   {line.length > 35 ? line.substring(0, 32) + '...' : line}
-                </span>
-                {lineIndex === currentLineIndex && !codingComplete && (
+              </span>
+              {lineIndex === currentLineIndex && !codingComplete && (
                   <span className={`animate-pulse ${isTextGlowing ? 'bg-cyan-400 text-black' : 'bg-green-400 text-black'}`}>_</span>
-                )}
-              </div>
-            ))}
+              )}
+            </div>
+          ))}
           </div>
           {showOptimized && (
             <div className={`mt-1 animate-pulse truncate text-[9px] transition-colors duration-500 ${isTextGlowing ? 'text-cyan-400' : 'text-cyan-400'}`}>
@@ -322,7 +322,7 @@ const ConsultingSlide: React.FC<ConsultingSlideProps> = ({ isVisible, currentEmo
   return (
     <>
       
-      <div className={`w-full h-full bg-white ${isAnimating ? 'opacity-50' : 'opacity-100'} transition-all duration-300 relative flex flex-col`}>
+    <div className={`w-full h-full bg-white ${isAnimating ? 'opacity-50' : 'opacity-100'} transition-all duration-300 relative flex flex-col`}>
 
       {/* レーダースキャンアニメーション */}
       {isRadarScanning && (
