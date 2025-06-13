@@ -906,142 +906,70 @@ export default function Home() {
         {/* サイドバー */}
         <div 
           ref={sidebarRef}
-          className="flex-shrink-0 overflow-y-auto border-r border-cyan-500/20"
+          className="flex-shrink-0 border-r border-cyan-500/20"
           style={{ 
             width: isSidebarOpen ? `${sidebarWidth}px` : '0px',
             transition: 'width 0.3s ease',
-            overflow: isSidebarOpen ? 'visible' : 'hidden'
+            overflow: isSidebarOpen ? 'visible' : 'hidden',
+            height: 'calc(100vh - 64px - 120px)'
           }}
         >
           {/* サイドバーのコンテンツ */}
-          <div className="p-4 space-y-4 h-full overflow-y-auto">
-            {/* リアルタイム感情分析ウィンドウ */}
-            <div className="bg-black/70 backdrop-blur-md rounded-lg border border-cyan-500/20 p-4 hover:border-cyan-400/30 transition-all duration-300">
-              <div className="flex items-center mb-3">
-                <div className="w-5 h-5 mr-2 rounded-md bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
-                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </div>
-                <h4 className="text-cyan-400 text-sm font-bold">リアルタイム感情分析</h4>
-              </div>
-              
-              {/* 自然言語での分析結果 */}
-              <div className="space-y-3 text-xs">
-                <div className="bg-black/30 rounded-lg p-3 border border-cyan-500/10">
-                  <div className="text-cyan-300 font-medium mb-2 text-xs">現在の感情状態</div>
-                  <p className="text-gray-200 leading-relaxed text-xs">
-                    {detectedFace ? (
-                      currentEmotion === 'neutral' ? 
-                        "お客様は冷静で中立的な表情をされています。情報を慎重に検討している可能性があります。このような状態は、お客様が提案内容について真剣に考えている証拠でもあります。論理的で具体的な説明が効果的でしょう。" : 
-                      currentEmotion === 'happy' ? 
-                        "お客様は明るい表情で、提案に対して前向きな印象を受けています。好感触です。笑顔が見られ、リラックスした状態で話を聞いてくださっています。このまま具体的な提案に進むタイミングが適切と判断されます。" : 
-                      currentEmotion === 'sad' ? 
-                        "お客様に少し困惑や不安の表情が見られます。懸念点について丁寧に説明することをお勧めします。表情から判断すると、何らかの課題や心配事を抱えている可能性があります。お客様の立場に立った共感的なアプローチが重要です。" : 
-                      currentEmotion === 'angry' ? 
-                        "お客様に不満や反対の兆候が見られます。一度話を整理し、お客様の懸念を聞くことが重要です。眉間にしわが寄り、口元が固くなっています。現在の提案内容に対して強い反発を感じている可能性があります。" :
-                      currentEmotion === 'fearful' ? 
-                        "お客様に不安や心配の表情が見られます。安心感を与える説明や実績の提示が効果的です。目元に緊張が見られ、決定に対する不安を感じている様子です。信頼関係の構築とリスク軽減の説明が必要です。" :
-                      currentEmotion === 'disgusted' ? 
-                        "お客様に否定的な反応が見られます。アプローチを変更し、お客様の価値観に合った提案を検討してください。現在の提案が期待とは大きく異なっている可能性があります。お客様のニーズを再確認することが急務です。" :
-                      currentEmotion === 'surprised' ? 
-                        "お客様が驚きの表情をされています。新しい情報に対する関心の表れかもしれません。目を見開き、予想外の内容に反応している様子です。この機会を活かして、さらに詳細な情報提供や具体例の説明が効果的でしょう。" : 
-                        "現在、感情状態の詳細分析を実行中です。表情の微細な変化や目線の動きを総合的に解析し、最適な営業戦略を立案しています。"
-                    ) : (
-                      "現在、カメラシステムで顔の検出を行っています。正面を向いてお座りください。感情分析システムが最適に機能するため、明るい照明の下で、カメラから適切な距離（約50cm〜1m）を保ってください。髪の毛や手で顔が隠れないよう注意し、自然な表情でいてください。"
-                    )}
-                  </p>
-                </div>
-
-                {/* 推奨アクション */}
-                <div className="bg-gradient-to-r from-cyan-900/30 to-blue-900/30 rounded-lg p-3 border border-cyan-500/20">
-                  <div className="text-cyan-300 font-medium mb-2 flex items-center text-xs">
-                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    推奨アクション
-                  </div>
-                  <p className="text-gray-300 text-xs leading-relaxed">
-                    {currentEmotion === 'neutral' ? 
-                      "具体的な数値や事例を用いて、より詳細な説明を行いましょう。データに基づいた論理的なアプローチが効果的です。" :
-                    currentEmotion === 'happy' ? 
-                      "この調子で話を進め、具体的な導入プランの提案に移りましょう。契約条件や実装スケジュールについて話し合うタイミングです。" :
-                    currentEmotion === 'sad' || currentEmotion === 'fearful' ? 
-                      "お客様の不安要素を聞き出し、丁寧にフォローアップしましょう。質問を促し、懸念点を一つずつ解決していくことが重要です。" :
-                    currentEmotion === 'angry' || currentEmotion === 'disgusted' ? 
-                      "一度話題を変更し、お客様のニーズを再確認することをお勧めします。現在の提案を見直し、お客様の期待に沿った内容に修正が必要です。" :
-                    currentEmotion === 'surprised' ? 
-                      "関心を示されているので、詳細な資料やデモの提案が効果的です。この機会を活かして、より深い情報提供を行いましょう。" :
-                      "お客様の反応を注意深く観察し、適切なタイミングで質問しましょう。表情の変化を見逃さないよう継続的にモニタリングします。"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Cristal連携ウィンドウ */}
-            <div className="bg-black/70 backdrop-blur-md rounded-lg border border-purple-500/20 p-4 hover:border-purple-400/30 transition-all duration-300">
-              <div className="flex items-center mb-3">
-                <div className="w-5 h-5 mr-2 rounded-md bg-gradient-to-br from-purple-400 to-pink-600 flex items-center justify-center">
-                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex-1 flex flex-col min-h-0 p-0 h-full">
+            <div className="bg-black/70 rounded-lg border border-cyan-500/20 p-0 flex flex-col flex-1 h-full min-h-0 overflow-y-auto mt-4">
+              {/* タイトル */}
+              <div className="flex items-center px-6 pt-4 pb-2">
+                <div className="w-6 h-6 mr-2 rounded-md bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
                 </div>
-                <h4 className="text-purple-400 text-xs font-bold">CRISTAL AI 連携</h4>
+                <h4 className="text-cyan-400 text-xl font-bold">CRISTAL AI連携</h4>
               </div>
-              
-              {/* AI分析レポート */}
-              <div className="space-y-3 text-xs">
+              {/* アニメーション */}
+              <div className="flex-1 flex items-center justify-center min-h-[200px]">
+                <div className="w-80 h-80 flex items-center justify-center">
+                  <StarrySphere />
+                </div>
+              </div>
+              {/* チャット欄 */}
+              <div className="p-4 border-t border-cyan-500/20 bg-black/60 shrink-0">
                 {cristalInputState === 'input' && (
-                  <>
-                    {/* 球体アニメーション */}
-                    <div className="bg-black/30 rounded-lg p-4 border border-purple-500/10 flex flex-col items-center justify-center">
-                      <div className="w-48 h-48">
-                        <StarrySphere />
+                  <div className="bg-gradient-to-r from-cyan-900/30 to-blue-900/20 rounded-xl p-4 border border-cyan-500/30 shadow-md">
+                    <div className="text-cyan-300 font-semibold mb-2 text-sm flex items-center">
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                      CRISTAL AIへの指示
+                    </div>
+                    <div className="space-y-2">
+                      <textarea
+                        value={messageText}
+                        onChange={(e) => setMessageText(e.target.value)}
+                        placeholder="CRISTALに質問や指示を入力..."
+                        className="w-full h-12 bg-black/30 border border-cyan-500/30 rounded-lg p-2 text-sm text-white placeholder-cyan-200 focus:outline-none focus:border-cyan-400/60 focus:ring-1 focus:ring-cyan-400/30 resize-none transition-all"
+                        rows={2}
+                      />
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={handleCristalSubmit}
+                          disabled={!messageText.trim()}
+                          className="flex-1 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-all shadow"
+                        >
+                          送信
+                        </button>
+                        <button
+                          onClick={() => setMessageText('')}
+                          className="px-4 py-2 bg-black/30 hover:bg-black/60 text-cyan-300 text-sm rounded-lg transition-all border border-cyan-500/30 shadow"
+                        >
+                          クリア
+                        </button>
                       </div>
                     </div>
-
-                    {/* メッセージフィールド */}
-                    <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded-lg p-3 border border-purple-500/20">
-                      <div className="text-purple-300 font-medium mb-2 text-xs flex items-center">
-                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
-                        AIへの指示
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <textarea
-                          value={messageText}
-                          onChange={(e) => setMessageText(e.target.value)}
-                          placeholder="CRISTALに質問や指示を入力..."
-                          className="w-full h-12 bg-black/40 border border-purple-500/30 rounded p-2 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-purple-400/60 focus:ring-1 focus:ring-purple-400/30 resize-none"
-                          rows={2}
-                        />
-                        
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={handleCristalSubmit}
-                            disabled={!messageText.trim()}
-                            className="flex-1 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white text-xs font-medium rounded transition-all"
-                          >
-                            送信
-                          </button>
-                          <button
-                            onClick={() => setMessageText('')}
-                            className="px-3 py-1.5 bg-black/40 hover:bg-black/60 text-purple-300 text-xs rounded transition-all border border-purple-500/30"
-                          >
-                            クリア
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </>
+                  </div>
                 )}
-
                 {cristalInputState === 'loading' && (
                   <div className="space-y-4">
-                    {/* ホログラフィック・プロジェクション・ウィンドウ */}
                     <div className="bg-black/30 rounded-lg p-4 border border-cyan-500/20 flex flex-col items-center justify-center">
                       <div className="relative w-full h-40">
                         <canvas 
@@ -1050,28 +978,21 @@ export default function Home() {
                         />
                       </div>
                     </div>
-
-                    {/* ホログラフィック・ローディング情報 */}
                     <div className="bg-gradient-to-r from-cyan-900/20 to-blue-900/30 rounded-lg p-4 border border-cyan-400/30 shadow-lg shadow-cyan-500/20">
                       <div className="text-center space-y-3">
-                        <h5 className="text-cyan-300 font-bold text-sm tracking-wider font-mono">
+                        <h5 className="text-cyan-300 font-bold text-lg tracking-wider font-mono">
                           🔮 HOLOGRAPHIC PROJECTION ACTIVE
                         </h5>
                         <p className="text-cyan-200 text-xs leading-relaxed">
                           {cristalAnalysisText}
                         </p>
-                        
-                        {/* ホログラフィック・プログレスバー */}
                         <div className="relative w-full bg-black/50 rounded-full h-3 overflow-hidden border border-cyan-500/30">
                           <div 
                             className="h-full bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 transition-all duration-300 ease-out relative"
                             style={{ width: `${cristalLoadingProgress}%` }}
                           >
-                            {/* グロー効果 */}
                             <div className="absolute inset-0 bg-gradient-to-r from-cyan-300/60 to-blue-300/60 animate-pulse"></div>
                           </div>
-                          
-                          {/* スキャンライン効果 */}
                           <div 
                             className="absolute top-0 h-full w-1 bg-white/80 shadow-lg shadow-cyan-400/50"
                             style={{ 
@@ -1080,7 +1001,6 @@ export default function Home() {
                             }}
                           ></div>
                         </div>
-                        
                         <div className="flex justify-between items-center">
                           <div className="text-cyan-400 text-xs font-mono">
                             PROJECTION: {Math.round(cristalLoadingProgress)}%
@@ -1089,8 +1009,6 @@ export default function Home() {
                             ✨ AI Neural Sync
                           </div>
                         </div>
-                        
-                        {/* ホログラム・ステータス・インジケーター */}
                         <div className="flex justify-center space-x-4 mt-3">
                           <div className="flex items-center space-x-1">
                             <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
@@ -1109,12 +1027,11 @@ export default function Home() {
                     </div>
                   </div>
                 )}
-
                 {cristalInputState === 'results' && (
                   <div className="space-y-3">
                     <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg p-3 border border-purple-500/20">
                       <div className="flex items-center justify-between mb-3">
-                        <h5 className="text-purple-300 font-bold text-sm">推奨アクション</h5>
+                        <h5 className="text-purple-300 font-bold text-xl">推奨アクション</h5>
                         <button
                           onClick={resetCristalState}
                           className="text-purple-400 hover:text-purple-300 text-xs"
@@ -1122,7 +1039,6 @@ export default function Home() {
                           戻る
                         </button>
                       </div>
-                      
                       <div className="space-y-3">
                         {recommendedActions.map((action, index) => (
                           <div 
