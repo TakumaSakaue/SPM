@@ -1059,32 +1059,7 @@ export default function Home() {
               </div>
               {/* AIへの指示欄を下部に分離して設置 */}
               <div className="mt-4 w-full">
-                <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded-lg p-3 border border-purple-500/20">
-                  <div className="space-y-2">
-                    <textarea
-                      value={messageText}
-                      onChange={(e) => setMessageText(e.target.value)}
-                      placeholder="CRISTALに質問や指示を入力..."
-                      className="w-full h-12 bg-black/40 border border-purple-500/30 rounded p-2 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-purple-400/60 focus:ring-1 focus:ring-purple-400/30 resize-none"
-                      rows={2}
-                    />
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={handleCristalSubmit}
-                        disabled={!messageText.trim()}
-                        className="flex-1 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white text-xs font-medium rounded transition-all"
-                      >
-                        送信
-                      </button>
-                      <button
-                        onClick={() => setMessageText('')}
-                        className="px-3 py-1.5 bg-black/40 hover:bg-black/60 text-purple-300 text-xs rounded transition-all border border-purple-500/30"
-                      >
-                        クリア
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded-lg p-3 border border-purple-500/20 min-h-[60px] h-20"></div>
               </div>
             </div>
           </div>
